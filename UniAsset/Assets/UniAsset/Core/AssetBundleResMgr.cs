@@ -68,7 +68,7 @@ namespace UniAsset
         {
             if ( string.IsNullOrEmpty (abName) )
             {
-                abName = ZeroConst.ROOT_AB_FILE_NAME;
+                abName = UniAssetConst.ROOT_AB_FILE_NAME;
             }
         }
 

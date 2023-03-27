@@ -14,9 +14,9 @@ namespace UniAsset
         /// <param name="abName"></param>
         protected string ABNameWithExtension (string abName)
         {
-            if ( false == abName.EndsWith (ZeroConst.AB_EXTENSION) )
+            if ( false == abName.EndsWith (UniAssetConst.AB_EXTENSION) )
             {
-                abName += ZeroConst.AB_EXTENSION;
+                abName += UniAssetConst.AB_EXTENSION;
             }
             abName = FileSystem.StandardizeBackslashSeparator (abName);
             return abName;
@@ -29,9 +29,9 @@ namespace UniAsset
         /// <returns></returns>
         protected string ABNameWithoutExtension (string abName)
         {
-            if ( abName.EndsWith (ZeroConst.AB_EXTENSION) )
+            if ( abName.EndsWith (UniAssetConst.AB_EXTENSION) )
             {
-                abName = abName.Replace (ZeroConst.AB_EXTENSION , "");
+                abName = abName.Replace (UniAssetConst.AB_EXTENSION , "");
             }
             abName = FileSystem.StandardizeBackslashSeparator (abName);
             return abName;

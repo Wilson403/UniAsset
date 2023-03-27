@@ -31,7 +31,7 @@ namespace UniAsset
             {
                 abName = ABNameWithoutExtension (abName);
                 string dir;
-                if ( abName.ToLower () != ZeroConst.ROOT_AB_FILE_NAME ) //resources表示从根目录获取资源，则不需要添加目录
+                if ( abName.ToLower () != UniAssetConst.ROOT_AB_FILE_NAME ) //resources表示从根目录获取资源，则不需要添加目录
                 {
                     dir = FileSystem.CombinePaths (_assetRoot , abName);
                 }

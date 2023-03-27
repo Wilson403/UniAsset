@@ -4,9 +4,9 @@ using UnityEngine;
 namespace UniAsset
 {
     /// <summary>
-    /// Zero框架的常量
+    /// 常量集合
     /// </summary>
-    public class ZeroConst
+    public class UniAssetConst
     {
         /// <summary>
         /// 热更AssetBundle资源的目录名称
@@ -108,7 +108,7 @@ namespace UniAsset
         /// <summary>
         /// 热更资源在项目中的根目录
         /// </summary>
-        public const string HOT_RESOURCES_ROOT_DIR = "Assets/Resources";
+        public const string HOT_RESOURCES_ROOT_DIR = "Assets/UnityResource";
 
         /// <summary>
         /// 热更配置在项目中的根目录
@@ -116,14 +116,9 @@ namespace UniAsset
         public const string HOT_CONFIGS_ROOT_DIR = "Assets/@Configs";
 
         /// <summary>
-        /// Zero框架的Library目录
+        /// UniAsset的Library目录
         /// </summary>
-        public const string ZERO_LIBRARY_DIR = "LibraryZero";
-
-        /// <summary>
-        /// 可热更的场景目录
-        /// </summary>
-        public const string HOT_UPDATE_SCENES_DIR = "Assets/Scenes/hot_update_scenes";
+        public const string UNIASSET_LIBRARY_DIR = "LibraryUniAsset";
 
         #endregion
 
@@ -217,7 +212,7 @@ namespace UniAsset
                 {
                     _persistentDataPath = Application.persistentDataPath;
 #if UNITY_EDITOR
-                    _persistentDataPath = FileSystem.CombineDirs (false , Directory.GetParent (Application.dataPath).FullName , ZERO_LIBRARY_DIR , "RuntimeCaches");
+                    _persistentDataPath = FileSystem.CombineDirs (false , Directory.GetParent (Application.dataPath).FullName , UNIASSET_LIBRARY_DIR , "RuntimeCaches");
 #elif UNITY_STANDALONE
                 _persistentDataPath = FileSystem.CombineDirs(false, Application.dataPath, "Caches");
 #endif
@@ -268,7 +263,7 @@ namespace UniAsset
             {
                 if ( _publicResRootDir == null )
                 {
-                    _publicResRootDir = FileSystem.CombineDirs (false , ZERO_LIBRARY_DIR , "Release" , "res" , PLATFORM_DIR_NAME);
+                    _publicResRootDir = FileSystem.CombineDirs (false , UNIASSET_LIBRARY_DIR , "Release" , "res" , PLATFORM_DIR_NAME);
                 }
                 return _publicResRootDir;
             }

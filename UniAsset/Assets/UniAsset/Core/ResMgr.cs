@@ -78,7 +78,7 @@ namespace UniAsset
         /// </summary>
         public void Init ()
         {
-            string path = FileSystem.CombinePaths (UniAssetRuntime.Ins.LocalResDir , ZeroConst.AssetBundleManifestName);
+            string path = FileSystem.CombinePaths (UniAssetRuntime.Ins.LocalResDir , UniAssetConst.AssetBundleManifestName);
             if ( UniAssetRuntime.Ins.IsHotResProject )
             {
                 if ( UniAssetRuntime.Ins.IsLoadAssetsByAssetDataBase )
