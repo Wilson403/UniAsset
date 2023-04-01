@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UniAsset;
 using UnityEditor;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 namespace UniAssetEditor
@@ -98,7 +99,6 @@ namespace UniAssetEditor
 
                 //加上后缀名
                 abName += UniAssetConst.AB_EXTENSION;
-
                 GetAssetList (abName).Add (ai.assetPath);
                 //找出依赖资源
                 FindDepends (ai , GetDependsSet (abName));
@@ -106,7 +106,7 @@ namespace UniAssetEditor
         }
 
         /// <summary>
-        /// 找出资源依赖的资源（如果依赖的资源已标记为AB，则忽略）
+        /// 找出资源依赖的资源
         /// </summary>
         /// <param name="ai"></param>
         private void FindDepends (AssetImporter ai , HashSet<string> dependsSet)
@@ -115,14 +115,14 @@ namespace UniAssetEditor
             string [] dps = AssetDatabase.GetDependencies (ai.assetPath);
             foreach ( string dependPath in dps )
             {
-                //要过滤掉依赖的Resources目录中的文件和脚本文件，Resources目录中的文件已设置，而脚本不能打包
+                //要过滤掉依赖根目录中的文件和脚本文件，根目录中的文件已设置，而脚本不能打包
                 if ( dependPath.StartsWith (_rootPath) || dependPath.Contains (".cs") )
                 {
                     continue;
                 }
 
                 //依赖的资源
-                if ( false == dependsSet.Contains (dependPath) )
+                if ( !dependsSet.Contains (dependPath) )
                 {
                     dependsSet.Add (dependPath);
                 }
@@ -155,21 +155,24 @@ namespace UniAssetEditor
         private void CreateCrossAssetBundle ()
         {
             #region 找出每一个资源依赖它的AB集合Set
+
             Dictionary<string , HashSet<string>> asset2ABDic = new Dictionary<string , HashSet<string>> ();
             foreach ( var ab in _dependsDic )
             {
                 foreach ( var asset in ab.Value )
                 {
-                    if ( false == asset2ABDic.ContainsKey (asset) )
+                    if ( !asset2ABDic.ContainsKey (asset) )
                     {
                         asset2ABDic [asset] = new HashSet<string> ();
                     }
                     asset2ABDic [asset].Add (ab.Key);
                 }
             }
+
             #endregion
 
             #region 移除掉只被一个AB依赖的资源，这种资源只需要和唯一依赖它的AB一起打包就行了
+
             HashSet<string> toRemoveKeySet = new HashSet<string> ();
             foreach ( var pair in asset2ABDic )
             {
@@ -183,6 +186,7 @@ namespace UniAssetEditor
             {
                 asset2ABDic.Remove (toRemoveKey);
             }
+
             #endregion
 
             #region 遍历每一个资源，找到和它被同样AB集合的资源，打到一个依赖AB包中，依次命名为cross_0, cross_1, cross_2
@@ -219,7 +223,7 @@ namespace UniAssetEditor
                         //判断是否所有的AB都一样
                         foreach ( var tempABName in assetPair.Value )
                         {
-                            if ( false == assetPair1.Value.Contains (tempABName) )
+                            if ( !assetPair1.Value.Contains (tempABName) )
                             {
                                 isSame = false;
                                 break;

@@ -15,6 +15,7 @@ namespace ZeroEditor
         public static void HotResBuild ()
         {
             new AssetBundleBuildCommand (UniAssetConst.PUBLISH_RES_ROOT_DIR).Execute ();
+            EditorUtil.OpenDirectory (FileSystem.CombineDirs (false , UniAssetConst.PUBLISH_RES_ROOT_DIR));
         }
     }
 }
