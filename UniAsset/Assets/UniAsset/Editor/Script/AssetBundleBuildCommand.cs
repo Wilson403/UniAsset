@@ -40,7 +40,7 @@ namespace UniAssetEditor
             _outputDir = outputDir;
             _abDic = new Dictionary<string , List<string>> ();
             _dependsDic = new Dictionary<string , HashSet<string>> ();
-            _rootPath = FileSystem.CombineDirs (true , UniAssetConst.HOT_RESOURCES_ROOT_DIR);
+            _rootPath = FileSystem.CombineDirs (true , UniAssetConst.ASSET_ROOT_DIR);
         }
 
         public void Execute ()

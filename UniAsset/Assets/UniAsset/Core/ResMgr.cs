@@ -14,7 +14,6 @@ namespace UniAsset
         public enum EResMgrType
         {
             ASSET_BUNDLE,
-            RESOURCES,
             ASSET_DATA_BASE,
         }
 
@@ -57,10 +56,7 @@ namespace UniAsset
                     }
                     _mgr = newMgr;
                     break;
-                case EResMgrType.RESOURCES:
-                    Debug.Log ("初始化资源管理器... 资源来源：[Resources]");
-                    _mgr = new ResourcesResMgr ();
-                    break;
+
                 case EResMgrType.ASSET_DATA_BASE:
                     Debug.Log ($"初始化资源管理器... 资源来源：[AssetDataBase] 资源根目录：{assetRoot}");
                     _mgr = new AssetDataBaseResMgr (assetRoot);
@@ -78,23 +74,12 @@ namespace UniAsset
         /// </summary>
         public void Init ()
         {
-            string path = FileSystem.CombinePaths (UniAssetRuntime.Ins.LocalResDir , UniAssetConst.AssetBundleManifestName);
-            if ( UniAssetRuntime.Ins.IsHotResProject )
+            if ( UniAssetRuntime.Ins.IsLoadAssetsByAssetDataBase )
             {
-                if ( UniAssetRuntime.Ins.IsLoadAssetsByAssetDataBase )
-                {
-                    Init (EResMgrType.RESOURCES , path);
-                    //Init (EResMgrType.ASSET_DATA_BASE , ZeroConst.HOT_RESOURCES_ROOT_DIR);
-                }
-                else
-                {
-                    Init (EResMgrType.ASSET_BUNDLE , path);
-                }
+                Init (EResMgrType.ASSET_DATA_BASE , UniAssetConst.ASSET_ROOT_DIR);
+                return;
             }
-            else
-            {
-                Init (EResMgrType.RESOURCES , path);
-            }
+            Init (EResMgrType.ASSET_BUNDLE , FileSystem.CombinePaths (UniAssetRuntime.Ins.LocalResDir , UniAssetConst.AssetBundleManifestName));
         }
 
         /// <summary>

@@ -106,9 +106,9 @@ namespace UniAsset
         #region 基于项目根目录的路径
 
         /// <summary>
-        /// 热更资源在项目中的根目录
+        /// 资源根目录
         /// </summary>
-        public const string HOT_RESOURCES_ROOT_DIR = "Assets/UnityResource";
+        public const string ASSET_ROOT_DIR = "Assets/UnityResource";
 
         /// <summary>
         /// 热更配置在项目中的根目录
