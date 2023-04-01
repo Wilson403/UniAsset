@@ -25,9 +25,7 @@ namespace UniAsset
             {
                 UnloadAll ();
                 _loadedABDic = new Dictionary<string , AssetBundle> ();
-
                 RootDir = FileSystem.StandardizeBackslashSeparator (Path.GetDirectoryName (manifestFilePath));
-
                 AssetBundle ab = AssetBundle.LoadFromFile (manifestFilePath);
                 _manifest = ab.LoadAsset<AssetBundleManifest> ("AssetBundleManifest");
                 if ( _manifest == null )
@@ -40,14 +38,6 @@ namespace UniAsset
             {
                 Debug.LogError (e);
             }
-        }
-
-        /// <summary>
-        /// APP错误
-        /// </summary>
-        private void OnAppError () 
-        {
-            Application.Quit ();
         }
 
         /// <summary>

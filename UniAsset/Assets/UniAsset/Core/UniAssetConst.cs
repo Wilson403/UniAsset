@@ -284,5 +284,21 @@ namespace UniAsset
                 return _manifestName;
             }
         }
+
+        static string _assetbundleDir;
+        /// <summary>
+        /// AssetBundle发布目录
+        /// </summary>
+        static public string PUBLISH_ASSETBUNDLE_DIR
+        {
+            get
+            {
+                if ( _assetbundleDir == null )
+                {
+                    _assetbundleDir = FileSystem.CombineDirs (false , PUBLISH_RES_ROOT_DIR , AB_DIR_NAME);
+                }
+                return _assetbundleDir;
+            }
+        }
     }
 }
