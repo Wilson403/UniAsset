@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using UniAsset;
 using UnityEditor;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 namespace UniAssetEditor
@@ -80,7 +79,7 @@ namespace UniAssetEditor
                 if ( null == ai )
                 {
                     continue;
-                }
+                 }
 
                 //根据资源的路径分AB包                 
                 var assetPath = ai.assetPath.Replace (_rootPath , "");
