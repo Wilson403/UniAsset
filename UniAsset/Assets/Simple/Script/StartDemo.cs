@@ -5,7 +5,7 @@ public class StartDemo : MonoBehaviour
 {
     private void Awake ()
     {
-        UniAssetRuntime.Ins.Init ();
+        UniAssetRuntime.Ins.Init (new EditorInitializeParameters ());
         ResMgr.Ins.Init ();
         GameObject.Instantiate (ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01"));
     }

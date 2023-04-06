@@ -74,7 +74,7 @@ namespace UniAsset
         /// </summary>
         public void Init ()
         {
-            if ( UniAssetRuntime.Ins.IsLoadAssetsByAssetDataBase )
+            if ( UniAssetRuntime.Ins.ResLoadMode == ResLoadMode.EDITOR )
             {
                 Init (EResMgrType.ASSET_DATA_BASE , UniAssetConst.ASSET_ROOT_DIR);
                 return;

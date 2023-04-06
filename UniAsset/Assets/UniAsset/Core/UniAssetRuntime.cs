@@ -6,11 +6,23 @@ namespace UniAsset
     public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
     {
         public string LocalResDir { get; private set; }
-        public bool IsLoadAssetsByAssetDataBase { get; private set; }
-        public bool IsLoadAssetsFromNet { get; private set; }
+        public ResLoadMode ResLoadMode { get; private set; }
 
-        public void Init ()
+        public void Init (ResInitializeParameters initializeParameters)
         {
+            if ( initializeParameters is EditorInitializeParameters )
+            {
+                ResLoadMode = ResLoadMode.EDITOR;
+            }
+            else if ( initializeParameters is OnlineInitializeParameters )
+            {
+                ResLoadMode = ResLoadMode.ON_LINE;
+            }
+            else if ( initializeParameters is OfflineInitializeParameters )
+            {
+                ResLoadMode = ResLoadMode.OFF_LINE;
+            }
+
             switch ( Application.platform )
             {
                 case RuntimePlatform.Android:
@@ -19,16 +31,14 @@ namespace UniAsset
                 case RuntimePlatform.WindowsEditor:
                 case RuntimePlatform.LinuxEditor:
                 case RuntimePlatform.OSXEditor:
-                    if ( IsLoadAssetsFromNet )
+                    if ( ResLoadMode == ResLoadMode.ON_LINE )
                     {
                         LocalResDir = UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH;
                     }
                     else
                     {
                         //编辑器下
-                        if ( Application.platform == RuntimePlatform.WindowsEditor ||
-                             Application.platform == RuntimePlatform.OSXEditor ||
-                             Application.platform == RuntimePlatform.LinuxEditor )
+                        if ( ResLoadMode == ResLoadMode.EDITOR )
                         {
                             LocalResDir = UniAssetConst.PUBLISH_RES_ROOT_DIR;
                         }
@@ -39,7 +49,7 @@ namespace UniAsset
                     }
                     break;
                 default:
-                    throw new System.Exception (string.Format ("暂时不支持平台：{0}" , Application.platform));
+                    throw new System.Exception (string.Format ("暂时不支持平台:{0}" , Application.platform));
             }
 
             //确保本地资源目录存在
