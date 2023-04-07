@@ -9,23 +9,10 @@ namespace UniAsset
     /// <summary>
     /// 资源管理器
     /// </summary>
-    public class ResMgr
+    public class ResMgr : ASingletonMonoBehaviour<ResMgr>
     {
-        public enum EResMgrType
-        {
-            ASSET_BUNDLE,
-            ASSET_DATA_BASE,
-        }
-
-        /// <summary>
-        /// 单例
-        /// </summary>
-        public static ResMgr Ins { get; } = new ResMgr ();
-
-        private ResMgr ()
-        {
-
-        }
+        public string LocalResDir { get; private set; }
+        public ResLoadMode ResLoadMode { get; private set; }
 
         AResMgr _mgr;
 
@@ -40,15 +27,65 @@ namespace UniAsset
         /// <summary>
         /// 初始化
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="assetRoot"></param>
-        public void Init (EResMgrType type , string assetRoot = null)
+        /// <param name="initializeParameters"></param>
+        /// <exception cref="System.Exception"></exception>
+        public void Init (ResInitializeParameters initializeParameters)
         {
-            switch ( type )
+            if ( initializeParameters is EditorInitializeParameters )
             {
-                case EResMgrType.ASSET_BUNDLE:
-                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetBundle]  Manifest路径：{assetRoot}");
-                    AssetBundleResMgr newMgr = new AssetBundleResMgr (assetRoot);
+                ResLoadMode = ResLoadMode.EDITOR;
+            }
+            else if ( initializeParameters is OnlineInitializeParameters )
+            {
+                ResLoadMode = ResLoadMode.ON_LINE;
+            }
+            else if ( initializeParameters is OfflineInitializeParameters )
+            {
+                ResLoadMode = ResLoadMode.OFF_LINE;
+            }
+
+            switch ( Application.platform )
+            {
+                case RuntimePlatform.Android:
+                case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
+                case RuntimePlatform.WindowsEditor:
+                case RuntimePlatform.LinuxEditor:
+                case RuntimePlatform.OSXEditor:
+                    if ( ResLoadMode == ResLoadMode.ON_LINE )
+                    {
+                        LocalResDir = UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH;
+                    }
+                    else
+                    {
+                        //编辑器下
+                        if ( ResLoadMode == ResLoadMode.EDITOR )
+                        {
+                            LocalResDir = UniAssetConst.PUBLISH_RES_ROOT_DIR;
+                        }
+                        else
+                        {
+                            LocalResDir = FileSystem.CombineDirs (false , UniAssetConst.PERSISTENT_DATA_PATH , UniAssetConst.UNIASSET_LIBRARY_DIR , "Release" , "res" , UniAssetConst.PLATFORM_DIR_NAME);
+                        }
+                    }
+                    break;
+                default:
+                    throw new System.Exception (string.Format ("暂时不支持平台:{0}" , Application.platform));
+            }
+
+            //确保本地资源目录存在
+            if ( false == Directory.Exists (LocalResDir) )
+            {
+                Directory.CreateDirectory (LocalResDir);
+            }
+            Debug.Log ($"Local Res Dir: {LocalResDir}");
+
+            switch ( ResLoadMode )
+            {
+                case ResLoadMode.ON_LINE:
+                case ResLoadMode.OFF_LINE:
+                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetBundle]  Manifest路径：{initializeParameters.assetRoot}");
+                    AssetBundleResMgr newMgr = new AssetBundleResMgr (initializeParameters.assetRoot);
                     if ( _mgr != null && _mgr is AssetBundleResMgr )
                     {
                         //替换旧的需要继承一下已加载字典
@@ -57,9 +94,9 @@ namespace UniAsset
                     _mgr = newMgr;
                     break;
 
-                case EResMgrType.ASSET_DATA_BASE:
-                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetDataBase] 资源根目录：{assetRoot}");
-                    _mgr = new AssetDataBaseResMgr (assetRoot);
+                case ResLoadMode.EDITOR:
+                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetDataBase] 资源根目录：{initializeParameters.assetRoot}");
+                    _mgr = new AssetDataBaseResMgr (initializeParameters.assetRoot);
                     break;
             }
         }
@@ -67,19 +104,6 @@ namespace UniAsset
         internal T Load<T> (object assetBundleName)
         {
             throw new NotImplementedException ();
-        }
-
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        public void Init ()
-        {
-            if ( UniAssetRuntime.Ins.ResLoadMode == ResLoadMode.EDITOR )
-            {
-                Init (EResMgrType.ASSET_DATA_BASE , UniAssetConst.ASSET_ROOT_DIR);
-                return;
-            }
-            Init (EResMgrType.ASSET_BUNDLE , FileSystem.CombinePaths (UniAssetRuntime.Ins.LocalResDir , UniAssetConst.AssetBundleManifestName));
         }
 
         /// <summary>
@@ -256,7 +280,7 @@ namespace UniAsset
 
         public bool AssetIsExists (string abName , string assetName)
         {
-            return _mgr.AssetIsExists (abName,assetName);
+            return _mgr.AssetIsExists (abName , assetName);
         }
     }
 }

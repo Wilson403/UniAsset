@@ -23,6 +23,6 @@
 
     public abstract class ResInitializeParameters
     {
-
+        public string assetRoot;
     }
 }
