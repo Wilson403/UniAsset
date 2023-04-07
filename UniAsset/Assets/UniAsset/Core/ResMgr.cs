@@ -31,59 +31,28 @@ namespace UniAsset
         /// <exception cref="System.Exception"></exception>
         public void Init (ResInitializeParameters initializeParameters)
         {
+            if ( initializeParameters == null ) 
+            {
+                throw new System.Exception ("加载参数异常");
+            }
+
             if ( initializeParameters is EditorInitializeParameters )
             {
-                ResLoadMode = ResLoadMode.EDITOR;
+                ResLoadMode = ResLoadMode.ASSET_DATA_BASE;
             }
             else if ( initializeParameters is OnlineInitializeParameters )
             {
-                ResLoadMode = ResLoadMode.ON_LINE;
+                ResLoadMode = ResLoadMode.REMOTE_ASSET_BUNDLE;
             }
             else if ( initializeParameters is OfflineInitializeParameters )
             {
-                ResLoadMode = ResLoadMode.OFF_LINE;
+                ResLoadMode = ResLoadMode.LOCAL_ASSET_BUNDLE;
             }
-
-            switch ( Application.platform )
-            {
-                case RuntimePlatform.Android:
-                case RuntimePlatform.IPhonePlayer:
-                case RuntimePlatform.WindowsPlayer:
-                case RuntimePlatform.WindowsEditor:
-                case RuntimePlatform.LinuxEditor:
-                case RuntimePlatform.OSXEditor:
-                    if ( ResLoadMode == ResLoadMode.ON_LINE )
-                    {
-                        LocalResDir = UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH;
-                    }
-                    else
-                    {
-                        //编辑器下
-                        if ( ResLoadMode == ResLoadMode.EDITOR )
-                        {
-                            LocalResDir = UniAssetConst.PUBLISH_RES_ROOT_DIR;
-                        }
-                        else
-                        {
-                            LocalResDir = FileSystem.CombineDirs (false , UniAssetConst.PERSISTENT_DATA_PATH , UniAssetConst.UNIASSET_LIBRARY_DIR , "Release" , "res" , UniAssetConst.PLATFORM_DIR_NAME);
-                        }
-                    }
-                    break;
-                default:
-                    throw new System.Exception (string.Format ("暂时不支持平台:{0}" , Application.platform));
-            }
-
-            //确保本地资源目录存在
-            if ( false == Directory.Exists (LocalResDir) )
-            {
-                Directory.CreateDirectory (LocalResDir);
-            }
-            Debug.Log ($"Local Res Dir: {LocalResDir}");
 
             switch ( ResLoadMode )
             {
-                case ResLoadMode.ON_LINE:
-                case ResLoadMode.OFF_LINE:
+                case ResLoadMode.REMOTE_ASSET_BUNDLE:
+                case ResLoadMode.LOCAL_ASSET_BUNDLE:
                     Debug.Log ($"初始化资源管理器... 资源来源：[AssetBundle]  Manifest路径：{initializeParameters.assetRoot}");
                     AssetBundleResMgr newMgr = new AssetBundleResMgr (initializeParameters.assetRoot);
                     if ( _mgr != null && _mgr is AssetBundleResMgr )
@@ -94,7 +63,7 @@ namespace UniAsset
                     _mgr = newMgr;
                     break;
 
-                case ResLoadMode.EDITOR:
+                case ResLoadMode.ASSET_DATA_BASE:
                     Debug.Log ($"初始化资源管理器... 资源来源：[AssetDataBase] 资源根目录：{initializeParameters.assetRoot}");
                     _mgr = new AssetDataBaseResMgr (initializeParameters.assetRoot);
                     break;

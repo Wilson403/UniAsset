@@ -1,4 +1,6 @@
-﻿namespace UniAsset
+﻿using System.IO;
+
+namespace UniAsset
 {
     /// <summary>
     /// 资源加载模式
@@ -6,23 +8,35 @@
     public enum ResLoadMode
     {
         /// <summary>
-        /// 编辑器模式，可直接加载无需打包成AB
+        /// 使用AssetDataBase接口来加载资源，只能在编辑器下使用
         /// </summary>
-        EDITOR = 0,
+        ASSET_DATA_BASE = 0,
 
         /// <summary>
-        /// 离线模式加载本地AB包
+        /// 本地加载AssetBundle
         /// </summary>
-        OFF_LINE = 1,
+        LOCAL_ASSET_BUNDLE = 1,
 
         /// <summary>
-        /// 联机模式下载AB包加载
+        /// 联机模式下载AssetBundle加载
         /// </summary>
-        ON_LINE = 2
+        REMOTE_ASSET_BUNDLE = 2
     }
 
     public abstract class ResInitializeParameters
     {
         public string assetRoot;
+
+        /// <summary>
+        /// 确保资源目录存在
+        /// </summary>
+        /// <param name="path"></param>
+        protected void CertainPathExists (string path)
+        {
+            if ( false == Directory.Exists (path) )
+            {
+                Directory.CreateDirectory (path);
+            }
+        }
     }
 }

@@ -4,7 +4,8 @@
     {
         public OnlineInitializeParameters ()
         {
-            assetRoot = FileSystem.CombinePaths (ResMgr.Ins.LocalResDir , UniAssetConst.AssetBundleManifestName);
+            CertainPathExists (UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH);
+            assetRoot = FileSystem.CombinePaths (UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH , UniAssetConst.AssetBundleManifestName);
         }
     }
 }
