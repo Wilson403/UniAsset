@@ -25,7 +25,7 @@ namespace UniAsset
 
     public abstract class ResInitializeParameters
     {
-        public string assetRoot;
+        public string AssetRoot { get; protected set; }
 
         /// <summary>
         /// 确保资源目录存在

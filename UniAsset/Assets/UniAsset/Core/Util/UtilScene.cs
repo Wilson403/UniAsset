@@ -20,7 +20,7 @@ namespace UniAsset
             Scene targetScene = SceneManager.GetSceneByName (loadSceneName);
             if ( !targetScene.isLoaded )
             {
-                ResMgr.Ins.StartCoroutine (LoadSceneAsync (loadSceneName , loadSceneMode , complete , process));
+                UniAssetRuntime.Ins.StartCoroutine (LoadSceneAsync (loadSceneName , loadSceneMode , complete , process));
             }
             else
             {

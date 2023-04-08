@@ -91,7 +91,7 @@ namespace UniAsset
 
         public override void LoadAsync (string abName , string assetName , Action<UnityEngine.Object> onLoaded , Action<float> onProgress = null)
         {
-            ResMgr.Ins.StartCoroutine (ResourceLoadAsync (AssetBundlePath2ResourcePath (abName , assetName) , onLoaded , onProgress));
+            UniAssetRuntime.Ins.StartCoroutine (ResourceLoadAsync (AssetBundlePath2ResourcePath (abName , assetName) , onLoaded , onProgress));
         }
 
         IEnumerator ResourceLoadAsync (string assetPath , Action<UnityEngine.Object> onLoaded , Action<float> onProgress)

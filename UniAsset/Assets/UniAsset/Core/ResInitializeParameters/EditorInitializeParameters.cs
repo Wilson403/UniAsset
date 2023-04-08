@@ -4,7 +4,7 @@
     {
         public EditorInitializeParameters () 
         {
-            assetRoot = UniAssetConst.ASSET_ROOT_DIR;
+            AssetRoot = UniAssetConst.ASSET_ROOT_DIR;
         }
     }
 }

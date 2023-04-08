@@ -88,7 +88,7 @@ namespace UniAsset
             MakeABNameNotEmpty (ref abName);
             abName = ABNameWithExtension (abName);
             AssetBundle ab = LoadAssetBundle (abName);
-            ResMgr.Ins.StartCoroutine (LoadAsync (ab , assetName , onLoaded , onProgress));
+            UniAssetRuntime.Ins.StartCoroutine (LoadAsync (ab , assetName , onLoaded , onProgress));
         }
 
         IEnumerator LoadAsync (AssetBundle ab , string assetName , Action<UnityEngine.Object> onLoaded , Action<float> onProgress)

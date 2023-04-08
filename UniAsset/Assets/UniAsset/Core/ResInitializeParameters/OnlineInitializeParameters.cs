@@ -2,10 +2,12 @@
 {
     public class OnlineInitializeParameters : ResInitializeParameters
     {
+        public string netResDir;
+
         public OnlineInitializeParameters ()
         {
             CertainPathExists (UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH);
-            assetRoot = FileSystem.CombinePaths (UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH , UniAssetConst.AssetBundleManifestName);
+            AssetRoot = UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH;
         }
     }
 }

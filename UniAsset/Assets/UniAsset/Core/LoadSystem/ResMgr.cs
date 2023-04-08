@@ -9,19 +9,40 @@ namespace UniAsset
     /// <summary>
     /// 资源管理器
     /// </summary>
-    public class ResMgr : ASingletonMonoBehaviour<ResMgr>
+    public class ResMgr : SafeSingleton<ResMgr>
     {
-        public string LocalResDir { get; private set; }
-        public ResLoadMode ResLoadMode { get; private set; }
-
         AResMgr _mgr;
+        ResLoadMode _resLoadMode;
+        ResInitializeParameters _initializeParameters;
 
         /// <summary>
         /// 资源根目录
         /// </summary>
         public string RootDir
         {
-            get { return _mgr.RootDir; }
+            get
+            {
+                return _mgr.RootDir;
+            }
+        }
+
+        /// <summary>
+        /// 初始化参数
+        /// </summary>
+        public ResInitializeParameters InitializeParameters
+        {
+            get
+            {
+                return _initializeParameters;
+            }
+        }
+
+        public ResLoadMode ResLoadMode 
+        {
+            get 
+            {
+                return _resLoadMode;
+            }
         }
 
         /// <summary>
@@ -31,41 +52,43 @@ namespace UniAsset
         /// <exception cref="System.Exception"></exception>
         public void Init (ResInitializeParameters initializeParameters)
         {
-            if ( initializeParameters == null ) 
+            if ( initializeParameters == null )
             {
                 throw new System.Exception ("加载参数异常");
             }
+            _initializeParameters = initializeParameters;
 
             if ( initializeParameters is EditorInitializeParameters )
             {
-                ResLoadMode = ResLoadMode.ASSET_DATA_BASE;
+                _resLoadMode = ResLoadMode.ASSET_DATA_BASE;
             }
             else if ( initializeParameters is OnlineInitializeParameters )
             {
-                ResLoadMode = ResLoadMode.REMOTE_ASSET_BUNDLE;
+                _resLoadMode = ResLoadMode.REMOTE_ASSET_BUNDLE;
             }
             else if ( initializeParameters is OfflineInitializeParameters )
             {
-                ResLoadMode = ResLoadMode.LOCAL_ASSET_BUNDLE;
+                _resLoadMode = ResLoadMode.LOCAL_ASSET_BUNDLE;
             }
 
-            switch ( ResLoadMode )
+            switch ( _resLoadMode )
             {
                 case ResLoadMode.REMOTE_ASSET_BUNDLE:
                 case ResLoadMode.LOCAL_ASSET_BUNDLE:
-                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetBundle]  Manifest路径：{initializeParameters.assetRoot}");
-                    AssetBundleResMgr newMgr = new AssetBundleResMgr (initializeParameters.assetRoot);
+                    string manifestFilePath = FileSystem.CombinePaths (initializeParameters.AssetRoot , UniAssetConst.AssetBundleManifestName);
+                    AssetBundleResMgr newMgr = new AssetBundleResMgr (manifestFilePath);
                     if ( _mgr != null && _mgr is AssetBundleResMgr )
                     {
                         //替换旧的需要继承一下已加载字典
                         newMgr.Inherit (_mgr as AssetBundleResMgr);
                     }
                     _mgr = newMgr;
+                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetBundle]  Manifest路径：{manifestFilePath}");
                     break;
 
                 case ResLoadMode.ASSET_DATA_BASE:
-                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetDataBase] 资源根目录：{initializeParameters.assetRoot}");
-                    _mgr = new AssetDataBaseResMgr (initializeParameters.assetRoot);
+                    _mgr = new AssetDataBaseResMgr (initializeParameters.AssetRoot);
+                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetDataBase] 资源根目录：{initializeParameters.AssetRoot}");
                     break;
             }
         }

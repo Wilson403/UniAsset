@@ -249,6 +249,12 @@ namespace UniAsset
                 {
                     _generatesPath = FileSystem.CombineDirs (false , PERSISTENT_DATA_PATH , "zero" , "generated");
                 }
+
+                if ( false == Directory.Exists (_generatesPath) )
+                {
+                    Directory.CreateDirectory (_generatesPath);
+                }
+
                 return _generatesPath;
             }
         }
