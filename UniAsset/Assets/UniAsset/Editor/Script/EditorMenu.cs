@@ -1,10 +1,9 @@
 ﻿using UniAsset;
-using UniAssetEditor;
 using UnityEditor;
 
 #pragma warning disable IDE0051
 #pragma warning disable IDE0052
-namespace ZeroEditor
+namespace UniAssetEditor
 {
     /// <summary>
     /// 框架编辑器菜单
@@ -23,6 +22,12 @@ namespace ZeroEditor
         public static void GenerateAssetBundleName ()
         {
             new GenerateAssetBundleNameModule ().Start ();
+        }
+
+        [MenuItem ("UniAsset/Setting" , false , 70)]
+        public static void OpenUniAssetSettingEditorWin ()
+        {
+            UniAssetSettingEditorWin.Open ();
         }
     }
 }
