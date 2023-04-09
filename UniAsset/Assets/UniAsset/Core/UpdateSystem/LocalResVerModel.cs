@@ -62,7 +62,7 @@ namespace UniAsset
         /// </summary>
         public void CreateLocalResVerFile ()
         {
-            string resFilePath = FileSystem.CombinePaths (ResMgr.Ins.InitializeParameters.AssetRoot , UniAssetConst.RES_JSON_FILE_NAME);
+            string resFilePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , UniAssetConst.RES_JSON_FILE_NAME);
             if ( !File.Exists (resFilePath) )
             {
                 Debug.Log ($"路径{resFilePath}不存在，跳过资源描述文件写入步骤");
@@ -85,7 +85,7 @@ namespace UniAsset
         {
             foreach ( ResVerItem item in vo.items )
             {
-                string filePath = FileSystem.CombinePaths (ResMgr.Ins.InitializeParameters.AssetRoot , item.name);
+                string filePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , item.name);
                 if ( !File.Exists (filePath) )
                 {
                     RemoveVer (item.name);
@@ -99,12 +99,12 @@ namespace UniAsset
         /// </summary>
         public void SaveResPackageVer ()
         {
-            string settingFilePath = FileSystem.CombinePaths (ResMgr.Ins.InitializeParameters.AssetRoot , UniAssetConst.SETTING_FILE_NAME);
+            string settingFilePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , UniAssetConst.SETTING_FILE_NAME);
             vo.resPackageVer = "0";
             if ( File.Exists (settingFilePath) )
             {
                 SettingVo settingVo = LitJson.JsonMapper.ToObject<SettingVo> (File.ReadAllText (settingFilePath));
-                if ( settingVo.resPackageVerDict.TryGetValue (UniAssetRuntime.Ins.GetAppMainVersion () , out ClientResVerVo clientResVerVo) )
+                if ( settingVo.resPackageVerDict.TryGetValue (UtilResVersionCompare.Ins.GetAppMainVersion () , out ClientResVerVo clientResVerVo) )
                 {
                     vo.resPackageVer = clientResVerVo.currentVer;
                 }

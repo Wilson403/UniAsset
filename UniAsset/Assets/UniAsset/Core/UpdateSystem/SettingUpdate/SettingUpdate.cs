@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
+using Primise4CSharp;
 using UnityEngine;
 
 namespace UniAsset
@@ -10,18 +11,16 @@ namespace UniAsset
     /// </summary>
     public class SettingUpdate
     {
-        Action _onLoaded;
-        Action<string> _onError;
+        Promise<SettingVo> _promise;
         string _localPath;
 
-        public void Start (Action onLoaded , Action<string> onError)
+        public Promise<SettingVo> Start ()
         {
             Debug.Log ("「SettingUpdate」配置文件更新检查...");
-            _onLoaded = onLoaded;
-            _onError = onError;
-            _localPath = FileSystem.CombinePaths (ResMgr.Ins.InitializeParameters.AssetRoot , "setting.json");
+            _promise = new Promise<SettingVo> ();
+            _localPath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , "setting.json");
 
-            if ( ResMgr.Ins.InitializeParameters is OnlineInitializeParameters onlineInitializeParameters && UniAssetRuntime.Ins.LocalData.IsUpdateSetting )
+            if ( UniAssetRuntime.Ins.ResInitializeParameters is OnlineInitializeParameters onlineInitializeParameters && UniAssetRuntime.Ins.LocalData.IsUpdateSetting )
             {
                 string netPath = FileSystem.CombinePaths (onlineInitializeParameters.netResDir , "setting.json");
                 Debug.Log ($"配置文件: {netPath}");
@@ -29,9 +28,9 @@ namespace UniAsset
             }
             else
             {
-                UniAssetRuntime.Ins.setting = new SettingVo ();
-                _onLoaded ();
+                _promise.Resolve (new SettingVo ());
             }
+            return _promise;
         }
 
         SettingVo LoadLocalSetting ()
@@ -61,17 +60,13 @@ namespace UniAsset
             if ( null != loader.Error )
             {
                 Debug.LogErrorFormat (loader.Error);
-                if ( null != _onError )
-                {
-                    _onError.Invoke (loader.Error);
-                }
+                _promise.Reject (new Exception (loader.Error));
                 yield break;
             }
             loader.Dispose ();
 
             SettingVo vo = LoadLocalSetting ();
-            UniAssetRuntime.Ins.setting = vo;
-            _onLoaded ();
+            _promise.Resolve (vo);
             yield break;
         }
     }

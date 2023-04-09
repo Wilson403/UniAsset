@@ -19,7 +19,7 @@ public class StartDemo : MonoBehaviour
         {
             initializeParameters = new OfflineInitializeParameters ();
         }
-        ResMgr.Ins.Init (initializeParameters);
+        UniAssetRuntime.Ins.Init (initializeParameters);
         GameObject.Instantiate (ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01"));
     }
 }

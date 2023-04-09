@@ -1,20 +1,31 @@
 ﻿using System;
-using System.Text;
+using Primise4CSharp;
 using UniAsset;
 using UnityEngine;
 
 public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
 {
     public event Action onUpdate;
-    public SettingVo setting;
+    public SettingVo Setting { get; private set; }
     public LocalDataModel LocalData { get; private set; }
     public LocalResVerModel LocalResVer { get; private set; }
+    public ResInitializeParameters ResInitializeParameters { get; private set; }
+    public ResLoadMode ResLoadMode { get; private set; }
 
+    //首个资源包的文件版本号数据模型
+    public ResVerModel firstNetResVer;
 
-    private void Awake ()
+    //最新资源包的文件版本号数据模型
+    public ResVerModel currentNetResVer;
+
+    /// <summary>
+    /// 获取资源版本信息
+    /// </summary>
+    /// <param name="isFirstVer"></param>
+    /// <returns></returns>
+    public ResVerModel GetResVerModel (bool isFirstVer)
     {
-        LocalData = new LocalDataModel ();
-        LocalResVer = new LocalResVerModel ();
+        return isFirstVer ? firstNetResVer : currentNetResVer;
     }
 
     private void Update ()
@@ -23,167 +34,232 @@ public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
     }
 
     /// <summary>
-    /// 比较APP主版本
-    /// 同网络上的比较
+    /// 初始化
     /// </summary>
-    /// <returns></returns>
-    public int CompareAppMainVersion ()
+    /// <param name="initializeParameters"></param>
+    /// <exception cref="System.Exception"></exception>
+    public void Init (ResInitializeParameters initializeParameters)
     {
-        int localmainVer = GetAppMainVersionNum (); //本地主版本号
-        int netMainVer; //网络主版本号
-        int result; //对比结果
+        if ( initializeParameters == null )
+        {
+            throw new System.Exception ("加载参数异常");
+        }
+        ResInitializeParameters = initializeParameters;
 
-        //尝试解析网络上的主版本号
-        try
+        if ( initializeParameters is EditorInitializeParameters )
         {
-            netMainVer = int.Parse (setting.client.version);
+            ResLoadMode = ResLoadMode.ASSET_DATA_BASE;
         }
-        catch ( Exception e )
+        else if ( initializeParameters is OnlineInitializeParameters )
         {
-            netMainVer = 0;
-            Debug.Log ($"网络app主版号{setting.client.version}解析错误: {e}");
+            ResLoadMode = ResLoadMode.REMOTE_ASSET_BUNDLE;
+        }
+        else if ( initializeParameters is OfflineInitializeParameters )
+        {
+            ResLoadMode = ResLoadMode.LOCAL_ASSET_BUNDLE;
         }
 
-        //若本地大于网络的
-        if ( localmainVer > netMainVer )
+        LocalData = new LocalDataModel ();
+        LocalResVer = new LocalResVerModel ();
+    }
+
+    /// <summary>
+    /// 开启预载
+    /// </summary>
+    public void StartPreload ()
+    {
+        if ( ResInitializeParameters == null )
         {
-            result = 1;
+            Debug.LogWarning ($"ResInitializeParameters数据为空，请先确保Init函数被执行");
+            return;
         }
-        //若本地小于网络的
-        else if ( localmainVer < netMainVer )
+
+        //先检查是否存在内嵌资源包(ZIP)，如果存在的话会等解压后再执行，不存在的话就直接执行
+        new PackageUpdate ().Start (default).Then (() =>
         {
-            result = -1;
+            //资源部署在远程服务器上，先走资源更新流程，把资源下载到本地目录
+            if ( ResLoadMode == ResLoadMode.REMOTE_ASSET_BUNDLE )
+            {
+                UpdateSettingFile ();
+                return;
+            }
+
+            PreloadDone ();
+        });
+    }
+
+    #region 资源更新流程
+
+    #region 第一步，更新Setting文件
+
+    /// <summary>
+    /// 更新Setting配置文件
+    /// </summary>
+    private void UpdateSettingFile ()
+    {
+        var promise = new SettingUpdate ().Start ();
+        promise.Then (SettingUpdateDone);
+        promise.Catch (OnUpdateError);
+    }
+
+    /// <summary>
+    /// Setting配置文件更新完成
+    /// </summary>
+    /// <param name="settingVo"></param>
+    private void SettingUpdateDone (SettingVo settingVo)
+    {
+        Setting = settingVo;
+        CheckResPackageVer ();
+    }
+
+    #endregion
+
+    #region 第二步，进行版本号对比，判断是否需要更新
+
+    /// <summary>
+    /// 检查资源包版本,判断是否需要更新资源
+    /// </summary>
+    private void CheckResPackageVer ()
+    {
+        new ResPackageVerChecker ().Start ().Then ((isNeedUpdateRes) =>
+        {
+            if ( isNeedUpdateRes )
+            {
+                ResVerFileUpdate ();
+                return;
+            }
+            PreloadDone ();
+        });
+    }
+
+    /// <summary>
+    /// 资源版本文件更新
+    /// </summary>
+    private void ResVerFileUpdate ()
+    {
+        Promise promise = new ResVerFileUpdate ().Start ();
+        promise.Then (StartupResUpdate);
+        promise.Catch (OnUpdateError);
+    }
+
+    #endregion
+
+    #region 第三步，实际的下载逻辑
+
+    bool _isUpdate = false;
+
+    /// <summary>
+    /// 更新初始化所需资源
+    /// </summary>
+    private void StartupResUpdate ()
+    {
+        var promise = new ResUpdate (true).Start (Setting.startupResGroups , OnProgressChange);
+        promise.Then (OnFirstResPackageUpdateComplete);
+        promise.Catch (OnUpdateError);
+    }
+
+    /// <summary>
+    /// 首个资源包更新完成
+    /// </summary>
+    /// <param name="isUpdate"></param>
+    private void OnFirstResPackageUpdateComplete (bool isUpdate)
+    {
+        _isUpdate = !_isUpdate ? isUpdate : _isUpdate;
+        //如果存在有效的最新资源包，进行下载
+        if ( Setting.IsUsefulResVer () )
+        {
+            var promise = new ResUpdate (false).Start (Setting.startupResGroups , OnProgressChange);
+            promise.Then (OnSecondResPackageUpdateComplete);
+            promise.Catch (OnUpdateError);
+            return;
         }
-        //两者相等
+        CheckResHash ();
+    }
+
+    /// <summary>
+    /// 次包（最新包）更新完成
+    /// </summary>
+    /// <param name="isUpdate"></param>
+    private void OnSecondResPackageUpdateComplete (bool isUpdate)
+    {
+        _isUpdate = !_isUpdate ? isUpdate : _isUpdate;
+        CheckResHash ();
+    }
+
+    /// <summary>
+    /// 检查资源是否合法
+    /// </summary>
+    private void CheckResHash ()
+    {
+        if ( _isUpdate )
+        {
+            if ( !LocalResVer.CheckHash () )
+            {
+                OnReUpdate ();
+                return;
+            }
+            PreloadDone ();
+        }
         else
         {
-            result = 0;
+            PreloadDone ();
         }
-
-        Debug.Log ($"网络app主版号：{setting.client.version}");
-
-        return result;
     }
 
     /// <summary>
-    /// 比较APP资源版本
+    /// 预载完成
     /// </summary>
-    /// <returns></returns>
-    public int CompareAppResVersion ()
+    public void PreloadDone ()
     {
-        //信息来源有问题就直接返回0
-        if ( setting.resPackageVerDict == null )
-        {
-            return 0;
-        }
-
-        setting.resPackageVerDict.TryGetValue (GetAppMainVersion () , out ClientResVerVo clientResVerVo);
-        clientResVerVo.currentVer = string.IsNullOrEmpty (clientResVerVo.currentVer) ? "0" : clientResVerVo.currentVer;
-        string localResPackageVer = LocalResVer.VO.resPackageVer;
-        localResPackageVer = string.IsNullOrEmpty (localResPackageVer) ? "0" : localResPackageVer;
-        Debug.Log ($"网络资源号：{clientResVerVo.currentVer},本地资源号：{localResPackageVer}");
-        return CheckVersionCode (localResPackageVer , clientResVerVo.currentVer);
+        ResMgr.Ins.Init ();
     }
 
     /// <summary>
-    /// 获取应用程序的主版本字符串
+    /// 进度刷新
     /// </summary>
-    /// <returns></returns>
-    public string GetAppMainVersion ()
+    /// <param name="process"></param>
+    /// <param name="total"></param>
+    public void OnProgressChange (float process , long total)
     {
-        string [] versionArr = Application.version.Split ('-');
-        if ( versionArr != null && versionArr.Length > 0 )
+
+    }
+
+    #endregion
+
+    #region 更新辅助方法
+
+    int _loadFailReCount;
+    const int LOAD_FAIL_RE_MAX_COUNT = 5;
+
+    /// <summary>
+    /// 更新失败
+    /// </summary>
+    /// <param name="e"></param>
+    private void OnUpdateError (Exception e)
+    {
+        //如果允许重试，则重新开始下载
+        if ( _loadFailReCount <= LOAD_FAIL_RE_MAX_COUNT )
         {
-            return versionArr [0];
+            _loadFailReCount++;
+            OnReUpdate ();
+            return;
         }
-        return "";
+        throw e;
     }
 
     /// <summary>
-    /// 获取应用程序的主版本号
+    /// 重新更新
     /// </summary>
-    /// <returns></returns>
-    /// <exception cref="Exception"></exception>
-    public int GetAppMainVersionNum ()
+    private void OnReUpdate ()
     {
-        int mainVerNumber = 0;
-        string mainVer = GetAppMainVersion ();
-        if ( !string.IsNullOrEmpty (mainVer) )
-        {
-            try
-            {
-                string [] mainVerArr = mainVer.Split ('.');
-                StringBuilder sb = new StringBuilder ();
-                foreach ( string item in mainVerArr )
-                {
-                    sb.Append (item);
-                }
-                mainVerNumber = int.Parse (sb.ToString ());
-            }
-            catch ( Exception e )
-            {
-                throw new Exception ($"应用程序的主版本号获取失败: {e}");
-            }
-        }
-        else
-        {
-            throw new Exception ("无效的版本参数，应用程序的主版本号获取失败");
-        }
-        return mainVerNumber;
+        //重新加载一次本地版本描述文件
+        LocalResVer.Load ();
+
+        //重新拉取Setting文件
+        UpdateSettingFile ();
     }
 
-    /// <summary>
-    /// 检查版本编码，如果编码1大于编码2，则返回1，等于返回0，小于返回-1
-    /// </summary>
-    /// <param name="code1"></param>
-    /// <param name="code2"></param>
-    /// <param name="isIgnoreLength"></param>
-    /// <returns></returns>
-    public int CheckVersionCode (string code1 , string code2 , bool isIgnoreLength = false)
-    {
-        string [] locals = code1.Split (new char [] { '.' } , StringSplitOptions.RemoveEmptyEntries);
-        string [] nets = code2.Split (new char [] { '.' } , StringSplitOptions.RemoveEmptyEntries);
+    #endregion
 
-        //长度检查
-        if ( !isIgnoreLength && locals.Length != nets.Length )
-        {
-            return -1;
-        }
-
-        for ( int i = 0 ; i < locals.Length ; i++ )
-        {
-            int lc = int.Parse (locals [i]);
-            int nc = int.Parse (nets [i]);
-
-            if ( lc > nc )
-            {
-                return 1;
-            }
-            else if ( lc < nc )
-            {
-                return -1;
-            }
-        }
-
-        return 0;
-    }
-
-    /// <summary>
-    /// 版本数字转字符串
-    /// </summary>
-    /// <param name="ver"></param>
-    /// <returns></returns>
-    public string VerNumToString (string ver)
-    {
-        StringBuilder sb = new StringBuilder ();
-        for ( int i = 0 ; i < ver.Length ; i++ )
-        {
-            sb.Append (ver [i]);
-            if ( i != ver.Length - 1 )
-            {
-                sb.Append ('.');
-            }
-        }
-        return sb.ToString ();
-    }
+    #endregion
 }

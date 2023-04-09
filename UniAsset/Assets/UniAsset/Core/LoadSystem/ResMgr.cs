@@ -12,8 +12,6 @@ namespace UniAsset
     public class ResMgr : SafeSingleton<ResMgr>
     {
         AResMgr _mgr;
-        ResLoadMode _resLoadMode;
-        ResInitializeParameters _initializeParameters;
 
         /// <summary>
         /// 资源根目录
@@ -27,55 +25,17 @@ namespace UniAsset
         }
 
         /// <summary>
-        /// 初始化参数
-        /// </summary>
-        public ResInitializeParameters InitializeParameters
-        {
-            get
-            {
-                return _initializeParameters;
-            }
-        }
-
-        public ResLoadMode ResLoadMode 
-        {
-            get 
-            {
-                return _resLoadMode;
-            }
-        }
-
-        /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="initializeParameters"></param>
         /// <exception cref="System.Exception"></exception>
-        public void Init (ResInitializeParameters initializeParameters)
+        public void Init ()
         {
-            if ( initializeParameters == null )
-            {
-                throw new System.Exception ("加载参数异常");
-            }
-            _initializeParameters = initializeParameters;
-
-            if ( initializeParameters is EditorInitializeParameters )
-            {
-                _resLoadMode = ResLoadMode.ASSET_DATA_BASE;
-            }
-            else if ( initializeParameters is OnlineInitializeParameters )
-            {
-                _resLoadMode = ResLoadMode.REMOTE_ASSET_BUNDLE;
-            }
-            else if ( initializeParameters is OfflineInitializeParameters )
-            {
-                _resLoadMode = ResLoadMode.LOCAL_ASSET_BUNDLE;
-            }
-
-            switch ( _resLoadMode )
+            switch ( UniAssetRuntime.Ins.ResLoadMode )
             {
                 case ResLoadMode.REMOTE_ASSET_BUNDLE:
                 case ResLoadMode.LOCAL_ASSET_BUNDLE:
-                    string manifestFilePath = FileSystem.CombinePaths (initializeParameters.AssetRoot , UniAssetConst.AssetBundleManifestName);
+                    string manifestFilePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , UniAssetConst.AssetBundleManifestName);
                     AssetBundleResMgr newMgr = new AssetBundleResMgr (manifestFilePath);
                     if ( _mgr != null && _mgr is AssetBundleResMgr )
                     {
@@ -87,8 +47,8 @@ namespace UniAsset
                     break;
 
                 case ResLoadMode.ASSET_DATA_BASE:
-                    _mgr = new AssetDataBaseResMgr (initializeParameters.AssetRoot);
-                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetDataBase] 资源根目录：{initializeParameters.AssetRoot}");
+                    _mgr = new AssetDataBaseResMgr (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot);
+                    Debug.Log ($"初始化资源管理器... 资源来源：[AssetDataBase] 资源根目录：{UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot}");
                     break;
             }
         }

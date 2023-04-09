@@ -233,7 +233,7 @@ namespace UniAsset
             bool isUseful = true;
             foreach ( ResVerItem item in vo.items )
             {
-                string filePath = FileSystem.CombinePaths (ResMgr.Ins.InitializeParameters.AssetRoot , item.name);
+                string filePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , item.name);
                 string localHash = UtilVerify.Ins.FileCRC32 (filePath);
                 if ( !File.Exists (filePath) || localHash != item.version )
                 {
