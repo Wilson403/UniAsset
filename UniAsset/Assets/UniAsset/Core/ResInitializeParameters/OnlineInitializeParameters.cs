@@ -4,8 +4,10 @@
     {
         public string netResDir;
 
-        public OnlineInitializeParameters ()
+        public OnlineInitializeParameters (string netResDir)
         {
+            netResDir = netResDir ?? "";
+            this.netResDir = netResDir;
             CertainPathExists (UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH);
             AssetRoot = UniAssetConst.WWW_RES_PERSISTENT_DATA_PATH;
         }

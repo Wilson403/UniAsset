@@ -30,7 +30,7 @@ public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
 
     private void Update ()
     {
-        onUpdate.Invoke ();
+        onUpdate?.Invoke ();
     }
 
     /// <summary>
@@ -63,15 +63,16 @@ public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
         LocalResVer = new LocalResVerModel ();
     }
 
+    readonly Promise _preloadPromise = new Promise ();
     /// <summary>
     /// 开启预载
     /// </summary>
-    public void StartPreload ()
+    public Promise StartPreload ()
     {
         if ( ResInitializeParameters == null )
         {
             Debug.LogWarning ($"ResInitializeParameters数据为空，请先确保Init函数被执行");
-            return;
+            return _preloadPromise;
         }
 
         //先检查是否存在内嵌资源包(ZIP)，如果存在的话会等解压后再执行，不存在的话就直接执行
@@ -86,6 +87,8 @@ public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
 
             PreloadDone ();
         });
+
+        return _preloadPromise;
     }
 
     #region 资源更新流程
@@ -212,6 +215,7 @@ public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
     public void PreloadDone ()
     {
         ResMgr.Ins.Init ();
+        _preloadPromise.Resolve ();
     }
 
     /// <summary>

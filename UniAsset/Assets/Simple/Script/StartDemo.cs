@@ -13,13 +13,17 @@ public class StartDemo : MonoBehaviour
         }
         else if ( config.resLoadMode == ResLoadMode.REMOTE_ASSET_BUNDLE )
         {
-            initializeParameters = new OnlineInitializeParameters ();
+            initializeParameters = new OnlineInitializeParameters (config.netPath);
         }
         else if ( config.resLoadMode == ResLoadMode.LOCAL_ASSET_BUNDLE )
         {
             initializeParameters = new OfflineInitializeParameters ();
         }
+
         UniAssetRuntime.Ins.Init (initializeParameters);
-        GameObject.Instantiate (ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01"));
+        UniAssetRuntime.Ins.StartPreload ().Then (() => 
+        {
+            GameObject.Instantiate (ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01"));
+        });
     }
 }
