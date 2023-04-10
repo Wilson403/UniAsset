@@ -16,13 +16,13 @@ namespace UniAsset
 
         public Promise<SettingVo> Start ()
         {
-            Debug.Log ("「SettingUpdate」配置文件更新检查...");
+            
             _promise = new Promise<SettingVo> ();
             _localPath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , "setting.json");
             if ( UniAssetRuntime.Ins.ResInitializeParameters is OnlineInitializeParameters onlineInitializeParameters && UniAssetRuntime.Ins.LocalData.IsUpdateSetting )
             {
                 string netPath = FileSystem.CombinePaths (onlineInitializeParameters.netResDir , "setting.json");
-                Debug.Log ($"配置文件: {netPath}");
+                Debug.Log ($"[{netPath}] setting文件更新检查...");
                 UniAssetRuntime.Ins.StartCoroutine (Update (netPath));
             }
             else

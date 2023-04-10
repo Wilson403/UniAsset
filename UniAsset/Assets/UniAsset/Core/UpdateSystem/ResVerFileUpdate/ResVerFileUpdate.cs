@@ -15,7 +15,6 @@ namespace UniAsset
         /// 文件本地路径
         /// </summary>
         private readonly string _localPath;
-
         private Promise _promise;
 
         public ResVerFileUpdate ()
@@ -31,10 +30,9 @@ namespace UniAsset
         /// <param name="onError"></param>
         public Promise Start ()
         {
-            Debug.Log ("「ResVerFileUpdate」资源版本号文件更新检查...");
-            string netPath = ( UniAssetRuntime.Ins.ResInitializeParameters as OnlineInitializeParameters ).netResDir;
-            string finalPath = Path.Combine (netPath , UtilResVersionCompare.Ins.GetAppMainVersion () , UniAssetRuntime.Ins.Setting.GetFirstNetResPackageVer ());
-            UniAssetRuntime.Ins.StartCoroutine (UpdateResVerFile (finalPath , OnUpdateFirstResVerComplete));
+            var url = UniAssetRuntime.Ins.GetRootUrl (true);
+            Debug.Log ($"「{url}」首个资源版本号文件更新检查...");
+            UniAssetRuntime.Ins.StartCoroutine (UpdateResVerFile (url , OnUpdateFirstResVerComplete));
             return _promise;
         }
 
@@ -46,9 +44,9 @@ namespace UniAsset
             TryLoadResVerFile (out UniAssetRuntime.Ins.firstNetResVer);
             if ( UniAssetRuntime.Ins.Setting.IsUsefulResVer () )
             {
-                string netPath = ( UniAssetRuntime.Ins.ResInitializeParameters as OnlineInitializeParameters ).netResDir;
-                string finalPath = Path.Combine (netPath , UtilResVersionCompare.Ins.GetAppMainVersion () , UniAssetRuntime.Ins.Setting.GetCurrentNetResPackageVer ());
-                UniAssetRuntime.Ins.StartCoroutine (UpdateResVerFile (finalPath , () =>
+                var url = UniAssetRuntime.Ins.GetRootUrl (false);
+                Debug.Log ($"「{url}」最新资源版本号文件更新检查...");
+                UniAssetRuntime.Ins.StartCoroutine (UpdateResVerFile (url , () =>
                 {
                     TryLoadResVerFile (out UniAssetRuntime.Ins.currentNetResVer);
                     _promise.Resolve ();

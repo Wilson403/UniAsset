@@ -91,6 +91,38 @@ public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
         return _preloadPromise;
     }
 
+    /// <summary>
+    /// 获取根URL
+    /// </summary>
+    /// <param name="isFirstVer"></param>
+    /// <returns></returns>
+    public string GetRootUrl (bool isFirstVer)
+    {
+        if ( ResLoadMode == ResLoadMode.REMOTE_ASSET_BUNDLE )
+        {
+            string netPath = ( ResInitializeParameters as OnlineInitializeParameters ).netResDir;
+            string ver = isFirstVer ? Setting.GetFirstNetResPackageVer () : Setting.GetCurrentNetResPackageVer ();
+            return FileSystem.CombinePaths (netPath , UtilResVersionCompare.Ins.GetAppMainVersion () , ver);
+        }
+        return "null";
+    }
+
+    /// <summary>
+    /// 获取根URL
+    /// </summary>
+    /// <param name="isFirstVer"></param>
+    /// <returns></returns>
+    public string GetAssetBundleUrl (bool isFirstVer)
+    {
+        if ( ResLoadMode == ResLoadMode.REMOTE_ASSET_BUNDLE )
+        {
+            string netPath = ( ResInitializeParameters as OnlineInitializeParameters ).netResDir;
+            string ver = isFirstVer ? Setting.GetFirstNetResPackageVer () : Setting.GetCurrentNetResPackageVer ();
+            return FileSystem.CombinePaths (netPath , UtilResVersionCompare.Ins.GetAppMainVersion () , ver , UniAssetConst.AB_DIR_NAME);
+        }
+        return "null";
+    }
+
     #region 资源更新流程
 
     #region 第一步，更新Setting文件

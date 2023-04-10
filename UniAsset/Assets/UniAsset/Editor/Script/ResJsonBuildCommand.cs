@@ -18,9 +18,9 @@ namespace UniAssetEditor
 
         public ResJsonBuildCommand (string sourceDir , AssetBundleSettingVo assetBundeBundleSettingVo)
         {
-            _sourceDir = FileSystem.CombineDirs (true , sourceDir);
-            _res = new ResVerVo ();
             _assetBundeBundleSettingVo = assetBundeBundleSettingVo;
+            _sourceDir = FileSystem.CombineDirs (true , sourceDir , _assetBundeBundleSettingVo.appVer , _assetBundeBundleSettingVo.resPackageVer , UniAssetConst.AB_DIR_NAME);
+            _res = new ResVerVo ();
         }
 
         public void Execute ()
@@ -31,7 +31,8 @@ namespace UniAssetEditor
                 return;
             }
 
-            var filePath = FileSystem.CombinePaths (_sourceDir , _assetBundeBundleSettingVo.appVer , _assetBundeBundleSettingVo.resPackageVer , UniAssetConst.RES_JSON_FILE_NAME);
+
+            var filePath = FileSystem.CombinePaths (_sourceDir.Replace (UniAssetConst.AB_DIR_NAME , "") , UniAssetConst.RES_JSON_FILE_NAME);
 
             //首先删除旧的
             if ( File.Exists (filePath) )
