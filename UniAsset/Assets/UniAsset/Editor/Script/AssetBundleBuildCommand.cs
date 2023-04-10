@@ -33,10 +33,12 @@ namespace UniAssetEditor
         private readonly Dictionary<string , HashSet<string>> _dependsDic;
 
         private readonly string _rootPath;
+        private readonly AssetBundleSettingVo _assetBundleSettingVo;
 
-        public AssetBundleBuildCommand (string outputDir)
+        public AssetBundleBuildCommand (string outputDir, AssetBundleSettingVo assetBundleSettingVo)
         {
-            _outputDir = outputDir;
+            _assetBundleSettingVo = assetBundleSettingVo;
+            _outputDir = FileSystem.CombinePaths (outputDir , _assetBundleSettingVo.appVer , _assetBundleSettingVo.resPackageVer , UniAssetConst.AB_DIR_NAME);
             _abDic = new Dictionary<string , List<string>> ();
             _dependsDic = new Dictionary<string , HashSet<string>> ();
             _rootPath = FileSystem.CombineDirs (true , UniAssetConst.ASSET_ROOT_DIR);

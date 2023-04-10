@@ -13,9 +13,7 @@ namespace UniAssetEditor
         [MenuItem ("UniAsset/Build AssetBundle" , false , 50)]
         public static void HotResBuild ()
         {
-            new AssetBundleBuildCommand (UniAssetConst.PUBLISH_ASSETBUNDLE_DIR).Execute ();
-            GenerateAssetBundleName ();
-            EditorUtil.OpenDirectory (FileSystem.CombineDirs (false , UniAssetConst.PUBLISH_RES_ROOT_DIR));
+            BuildAssetBundelEditorWin.Open ();
         }
 
         [MenuItem ("UniAsset/GenerateAssetBundleName" , false , 60)]

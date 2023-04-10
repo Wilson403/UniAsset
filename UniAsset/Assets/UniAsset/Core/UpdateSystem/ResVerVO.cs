@@ -35,10 +35,5 @@
         /// 资源包版本
         /// </summary>
         public string resPackageVer;
-
-        /// <summary>
-        /// 安卓SO库版本
-        /// </summary>
-        public string androidIl2cppPatchVer;
     }
 }

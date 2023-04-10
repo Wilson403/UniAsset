@@ -56,7 +56,7 @@ namespace UniAsset
         /// </summary>
         void Save2Local()
         {            
-            string json = LitJson.JsonMapper.ToJson(_vo);
+            string json = LitJson.JsonMapper.ToPrettyJson (_vo);
             File.WriteAllText(_path, json);
         }
 

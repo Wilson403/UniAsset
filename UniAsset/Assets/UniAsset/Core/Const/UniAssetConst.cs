@@ -51,7 +51,7 @@ namespace UniAsset
         /// <summary>
         /// 资源版本描述文件的名称
         /// </summary>
-        public const string RES_JSON_FILE_NAME = "resVer";
+        public const string RES_JSON_FILE_NAME = "resVer.json";
 
         /// <summary>
         /// 启动配置文件名称
@@ -288,22 +288,6 @@ namespace UniAsset
                     _manifestName = FileSystem.CombinePaths (AB_DIR_NAME , MANIFEST_FILE_NAME + AB_EXTENSION);
                 }
                 return _manifestName;
-            }
-        }
-
-        static string _assetbundleDir;
-        /// <summary>
-        /// AssetBundle发布目录
-        /// </summary>
-        static public string PUBLISH_ASSETBUNDLE_DIR
-        {
-            get
-            {
-                if ( _assetbundleDir == null )
-                {
-                    _assetbundleDir = FileSystem.CombineDirs (false , PUBLISH_RES_ROOT_DIR , AB_DIR_NAME);
-                }
-                return _assetbundleDir;
             }
         }
     }

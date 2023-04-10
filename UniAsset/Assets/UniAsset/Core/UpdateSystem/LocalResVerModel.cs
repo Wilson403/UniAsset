@@ -150,7 +150,7 @@ namespace UniAsset
         /// </summary>
         public void Save ()
         {
-            File.WriteAllText (_path , LitJson.JsonMapper.ToJson (vo));
+            File.WriteAllText (_path , LitJson.JsonMapper.ToPrettyJson (vo));
         }
     }
 }

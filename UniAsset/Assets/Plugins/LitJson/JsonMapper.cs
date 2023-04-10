@@ -887,6 +887,22 @@ namespace LitJson
             }
         }
 
+        static JsonWriter _prettyJsonWriter = new JsonWriter ();
+        public static string ToPrettyJson (object obj)
+        {
+            lock ( _prettyJsonWriter )
+            {
+                _prettyJsonWriter.Reset ();
+                if ( false == _prettyJsonWriter.PrettyPrint )
+                {
+                    _prettyJsonWriter.IndentValue = 4;
+                    _prettyJsonWriter.PrettyPrint = true;
+                }
+                WriteValue (obj , _prettyJsonWriter , true , 0);
+                return _prettyJsonWriter.ToString ();
+            }
+        }
+
         public static void ToJson (object obj, JsonWriter writer)
         {
             WriteValue (obj, writer, false, 0);

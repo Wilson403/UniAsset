@@ -8,9 +8,7 @@ namespace UniAsset
     /// </summary>
     public struct ClientVo
     {
-        /// <summary>
-        /// 客户端版本
-        /// </summary>
+        [LabelText("客户端版本")]
         public string version;
     }
 

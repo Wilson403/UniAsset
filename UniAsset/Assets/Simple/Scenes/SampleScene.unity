@@ -426,5 +426,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5bc5919e8515194ba8fff1ea7222ba1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resLoadMode: 0
+  resLoadMode: 2
   netPath: http://192.168.31.197/res_test/

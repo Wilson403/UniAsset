@@ -70,9 +70,8 @@ namespace UniAssetEditor
             }
         }
 
-        [Title ("客户端版本")]
         [InfoBox ("当客户端主版本号低于setting文件主版本号时，将打开更新页面")]
-        [LabelText ("版本号")]
+        [LabelText ("客户端版本")]
         public string version;
 
         [ShowInInspector, DictionaryDrawerSettings (KeyLabel = "APP主版本" , ValueLabel = "资源版本数据")]
@@ -102,22 +101,12 @@ namespace UniAssetEditor
             }
 
             UpdateCfg ();
-            string jsonStr = LitJson.JsonMapper.ToJson (_cfg);
+            string jsonStr = LitJson.JsonMapper.ToPrettyJson (_cfg);
             File.WriteAllText (filePath , jsonStr);
             EditorUtil.SaveConfig (_cfg , UniAssetConst.SETTING_FILE_NAME);
 
             //打开目录
             EditorUtil.OpenDirectory (UniAssetConst.PUBLISH_RES_ROOT_DIR);
-        }
-
-        private void OnSettingJsonUploadCompleted ()
-        {
-            ShowTip ("Setting文件上传完成");
-        }
-
-        private void OnSettingJsonUploadError (string error)
-        {
-            ShowTip ("Setting文件上传失败");
         }
     }
 }
