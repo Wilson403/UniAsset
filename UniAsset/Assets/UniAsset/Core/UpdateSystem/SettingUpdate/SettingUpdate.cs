@@ -21,7 +21,7 @@ namespace UniAsset
             _localPath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , "setting.json");
             if ( UniAssetRuntime.Ins.ResInitializeParameters is OnlineInitializeParameters onlineInitializeParameters && UniAssetRuntime.Ins.LocalData.IsUpdateSetting )
             {
-                string netPath = FileSystem.CombinePaths (onlineInitializeParameters.netResDir , "setting.json");
+                string netPath = FileSystem.CombinePaths (onlineInitializeParameters.NetResDir , "setting.json");
                 Debug.Log ($"[{netPath}] setting文件更新检查...");
                 UniAssetRuntime.Ins.StartCoroutine (Update (netPath));
             }

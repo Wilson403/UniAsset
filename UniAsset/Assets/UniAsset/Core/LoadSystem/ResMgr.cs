@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UniAsset.LocalDataModel;
 
 namespace UniAsset
 {
@@ -35,7 +36,7 @@ namespace UniAsset
             {
                 case ResLoadMode.REMOTE_ASSET_BUNDLE:
                 case ResLoadMode.LOCAL_ASSET_BUNDLE:
-                    string manifestFilePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , UniAssetConst.AssetBundleManifestName);
+                    string manifestFilePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , UniAssetConst.AB_DIR_NAME , UniAssetConst.AssetBundleManifestName);
                     AssetBundleResMgr newMgr = new AssetBundleResMgr (manifestFilePath);
                     if ( _mgr != null && _mgr is AssetBundleResMgr )
                     {

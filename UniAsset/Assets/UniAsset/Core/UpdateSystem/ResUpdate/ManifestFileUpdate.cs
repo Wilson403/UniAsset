@@ -9,7 +9,7 @@ namespace UniAsset
     /// </summary>
     public class ManifestFileUpdate
     {
-        private readonly string _manifestName;
+        private readonly string _manifestPath;
         private readonly bool _isFirstVer;
         private readonly Promise _promise;
 
@@ -17,15 +17,15 @@ namespace UniAsset
         {
             _promise = new Promise ();
             _isFirstVer = isFirstVer;
-            _manifestName = UniAssetConst.AssetBundleManifestName;
+            _manifestPath = FileSystem.CombinePaths (UniAssetConst.AB_DIR_NAME , UniAssetConst.AssetBundleManifestName);
         }
 
         public Promise Start (bool isNeedUpdate = true)
         {
-            if ( isNeedUpdate && !UniAssetRuntime.Ins.GetResVerModel (_isFirstVer).IsSameVer (_manifestName , UniAssetRuntime.Ins.LocalResVer) )
+            if ( isNeedUpdate && !UniAssetRuntime.Ins.GetResVerModel (_isFirstVer).IsSameVer (_manifestPath , UniAssetRuntime.Ins.LocalResVer) )
             {
-                string url = FileSystem.CombinePaths (UniAssetRuntime.Ins.GetAssetBundleUrl (_isFirstVer) , _manifestName);
-                UniAssetRuntime.Ins.StartCoroutine (Update (url , UniAssetRuntime.Ins.GetResVerModel (_isFirstVer).GetVer (_manifestName)));
+                string url = FileSystem.CombinePaths (UniAssetRuntime.Ins.GetRootUrl (_isFirstVer) , _manifestPath);
+                UniAssetRuntime.Ins.StartCoroutine (Update (url , UniAssetRuntime.Ins.GetResVerModel (_isFirstVer).GetVer (_manifestPath)));
                 Debug.Log ($"[{url}] Manifest正在更新...");
             }
             else
@@ -44,7 +44,7 @@ namespace UniAsset
 
         private IEnumerator Update (string url , string ver)
         {
-            Downloader loader = new Downloader (url , FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , _manifestName) , ver , ResVerifyLevel.HIGHT);
+            Downloader loader = new Downloader (url , FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , _manifestPath) , ver , ResVerifyLevel.HIGHT);
             while ( false == loader.IsDone )
             {
                 yield return new WaitForEndOfFrame ();
@@ -57,7 +57,7 @@ namespace UniAsset
             }
 
             loader.Dispose ();
-            UniAssetRuntime.Ins.LocalResVer.SetVerAndSave (_manifestName , ver);
+            UniAssetRuntime.Ins.LocalResVer.SetVerAndSave (_manifestPath , ver);
             InitResMgr ();
             yield break;
         }

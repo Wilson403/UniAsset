@@ -100,7 +100,7 @@ public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
     {
         if ( ResLoadMode == ResLoadMode.REMOTE_ASSET_BUNDLE )
         {
-            string netPath = ( ResInitializeParameters as OnlineInitializeParameters ).netResDir;
+            string netPath = ( ResInitializeParameters as OnlineInitializeParameters ).NetResDir;
             string ver = isFirstVer ? Setting.GetFirstNetResPackageVer () : Setting.GetCurrentNetResPackageVer ();
             return FileSystem.CombinePaths (netPath , UtilResVersionCompare.Ins.GetAppMainVersion () , ver);
         }
@@ -116,7 +116,7 @@ public class UniAssetRuntime : ASingletonMonoBehaviour<UniAssetRuntime>
     {
         if ( ResLoadMode == ResLoadMode.REMOTE_ASSET_BUNDLE )
         {
-            string netPath = ( ResInitializeParameters as OnlineInitializeParameters ).netResDir;
+            string netPath = ( ResInitializeParameters as OnlineInitializeParameters ).NetResDir;
             string ver = isFirstVer ? Setting.GetFirstNetResPackageVer () : Setting.GetCurrentNetResPackageVer ();
             return FileSystem.CombinePaths (netPath , UtilResVersionCompare.Ins.GetAppMainVersion () , ver , UniAssetConst.AB_DIR_NAME);
         }

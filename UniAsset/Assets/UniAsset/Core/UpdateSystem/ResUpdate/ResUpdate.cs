@@ -59,9 +59,8 @@ namespace UniAsset
             //穷举更新列表，并加入下载器
             for ( int i = 0 ; i < needUpdateResList.Length ; i++ )
             {
-
                 string resName = needUpdateResList [i];
-                string url = FileSystem.CombinePaths (UniAssetRuntime.Ins.GetAssetBundleUrl (_isFirstVer) , resName);
+                string url = FileSystem.CombinePaths (UniAssetRuntime.Ins.GetRootUrl (_isFirstVer) , resName);
                 string savePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , resName);
                 ResVerItem netItem = UniAssetRuntime.Ins.GetResVerModel (_isFirstVer).Get (resName);
                 //将要下载的文件依次添加入下载器
