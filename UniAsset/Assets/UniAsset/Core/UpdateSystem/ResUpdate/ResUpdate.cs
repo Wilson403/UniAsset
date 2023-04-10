@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.IO;
 using Primise4CSharp;
 using UnityEngine;
 
@@ -22,7 +21,6 @@ namespace UniAsset
         private readonly bool _isFirstVer;
         private Action<float , long> _onProgress;
         private string [] _groups;
-        private readonly string _netPath;
         private readonly Promise<bool> _promise;
 
         public ResUpdate (bool isFirstVer , bool needUpdateManifestFile = true)
@@ -30,9 +28,6 @@ namespace UniAsset
             _promise = new Promise<bool> ();
             _isFirstVer = isFirstVer;
             _needUpdateManifestFile = needUpdateManifestFile;
-            string netPath = ( UniAssetRuntime.Ins.ResInitializeParameters as OnlineInitializeParameters ).netResDir;
-            string ver = isFirstVer ? UniAssetRuntime.Ins.Setting.GetFirstNetResPackageVer () : UniAssetRuntime.Ins.Setting.GetCurrentNetResPackageVer ();
-            _netPath = Path.Combine (netPath , UtilResVersionCompare.Ins.GetAppMainVersion () , ver);
         }
 
         public Promise<bool> Start (string [] groups , Action<float , long> onProgress = null)
@@ -66,7 +61,7 @@ namespace UniAsset
             {
 
                 string resName = needUpdateResList [i];
-                string url = FileSystem.CombinePaths (_netPath , resName);
+                string url = FileSystem.CombinePaths (UniAssetRuntime.Ins.GetAssetBundleUrl (_isFirstVer) , resName);
                 string savePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , resName);
                 ResVerItem netItem = UniAssetRuntime.Ins.GetResVerModel (_isFirstVer).Get (resName);
                 //将要下载的文件依次添加入下载器
