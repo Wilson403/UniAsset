@@ -262,13 +262,13 @@ namespace UniAssetEditor
                 i++;
             }
 
-            if ( false == Directory.Exists (UniAssetEditorConst.ASSET_BUNDLE_CACHE_DIR) )
+            if ( false == Directory.Exists (UniAssetConst.ASSET_BUNDLE_CACHE_DIR) )
             {
-                Directory.CreateDirectory (UniAssetEditorConst.ASSET_BUNDLE_CACHE_DIR);
+                Directory.CreateDirectory (UniAssetConst.ASSET_BUNDLE_CACHE_DIR);
             }
 
             AssetBundleManifest = BuildPipeline.BuildAssetBundles (
-                outputPath: UniAssetEditorConst.ASSET_BUNDLE_CACHE_DIR ,
+                outputPath: UniAssetConst.ASSET_BUNDLE_CACHE_DIR ,
                 builds: abbList ,
                 assetBundleOptions: BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle ,
                 targetPlatform: UniAssetEditorConst.BUILD_PLATFORM);
@@ -297,8 +297,8 @@ namespace UniAssetEditor
                 usefulFileSet.Add (abFile + ".manifest");
             }
 
-            var abDir = FileSystem.CombineDirs (true , UniAssetEditorConst.ASSET_BUNDLE_CACHE_DIR);
-            var files = Directory.GetFiles (UniAssetEditorConst.ASSET_BUNDLE_CACHE_DIR , "*" , SearchOption.AllDirectories);
+            var abDir = FileSystem.CombineDirs (true , UniAssetConst.ASSET_BUNDLE_CACHE_DIR);
+            var files = Directory.GetFiles (UniAssetConst.ASSET_BUNDLE_CACHE_DIR , "*" , SearchOption.AllDirectories);
             foreach ( var file in files )
             {
                 var tempFile = FileSystem.StandardizeBackslashSeparator (file);
@@ -312,7 +312,7 @@ namespace UniAssetEditor
             }
 
             //删除空的文件夹
-            DirectoryInfo dir = new DirectoryInfo (UniAssetEditorConst.ASSET_BUNDLE_CACHE_DIR);
+            DirectoryInfo dir = new DirectoryInfo (UniAssetConst.ASSET_BUNDLE_CACHE_DIR);
             DirectoryInfo [] subdirs = dir.GetDirectories ("*.*" , SearchOption.AllDirectories);
             foreach ( DirectoryInfo subdir in subdirs )
             {
@@ -343,15 +343,18 @@ namespace UniAssetEditor
             var assetBundles = AssetBundleManifest.GetAllAssetBundles ();
             foreach ( var ab in assetBundles )
             {
-                string sourceABPath = FileSystem.CombinePaths (UniAssetEditorConst.ASSET_BUNDLE_CACHE_DIR , ab);
+                string sourceABPath = FileSystem.CombinePaths (UniAssetConst.ASSET_BUNDLE_CACHE_DIR , ab);
                 string targetABPath = FileSystem.CombinePaths (_outputDir , ab);
                 FileSystem.Copy (sourceABPath , targetABPath , true);
             }
 
             //移动Manifest文件
-            string sourceManifestPath = FileSystem.CombinePaths (UniAssetEditorConst.ASSET_BUNDLE_CACHE_DIR , UniAssetConst.AB_DIR_NAME);
+            string sourceManifestPath = FileSystem.CombinePaths (UniAssetConst.ASSET_BUNDLE_CACHE_DIR , UniAssetConst.AB_DIR_NAME);
             string targetManifestPath = FileSystem.CombinePaths (_outputDir , UniAssetConst.MANIFEST_FILE_NAME + UniAssetConst.AB_EXTENSION);
+
+            FileSystem.Copy (sourceManifestPath , FileSystem.CombinePaths (UniAssetConst.ASSET_BUNDLE_CACHE_DIR , UniAssetConst.MANIFEST_FILE_NAME + UniAssetConst.AB_EXTENSION) , true);
             FileSystem.Copy (sourceManifestPath , targetManifestPath , true);
+            File.Delete (sourceManifestPath);
         }
     }
 }

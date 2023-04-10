@@ -285,10 +285,15 @@ namespace UniAsset
             {
                 if ( _manifestName == null )
                 {
-                    _manifestName = FileSystem.CombinePaths (AB_DIR_NAME , MANIFEST_FILE_NAME + AB_EXTENSION);
+                    _manifestName = MANIFEST_FILE_NAME + AB_EXTENSION;
                 }
                 return _manifestName;
             }
         }
+
+        /// <summary>
+        /// AssetBundle打包缓存目录
+        /// </summary>
+        static public string ASSET_BUNDLE_CACHE_DIR = FileSystem.CombineDirs (false , UNIASSET_LIBRARY_DIR , "ReleaseCache" , AB_DIR_NAME);
     }
 }

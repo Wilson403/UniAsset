@@ -25,11 +25,6 @@ namespace UniAssetEditor
         }
 
         /// <summary>
-        /// AssetBundle打包缓存目录
-        /// </summary>
-        static public string ASSET_BUNDLE_CACHE_DIR = FileSystem.CombineDirs (false , UniAssetConst.UNIASSET_LIBRARY_DIR , "ReleaseCache" , UniAssetConst.AB_DIR_NAME);
-
-        /// <summary>
         /// 编辑器配置文件目录
         /// </summary>
         static public string EDITOR_CONFIG_DIR = FileSystem.CombineDirs (false , UniAssetConst.UNIASSET_LIBRARY_DIR , "EditorConfigs");
