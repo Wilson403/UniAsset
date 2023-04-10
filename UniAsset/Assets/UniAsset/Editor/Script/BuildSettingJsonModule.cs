@@ -74,7 +74,9 @@ namespace UniAssetEditor
         [LabelText ("客户端版本")]
         public string version;
 
-        [ShowInInspector, DictionaryDrawerSettings (KeyLabel = "APP主版本" , ValueLabel = "资源版本数据")]
+        [Space (10)]
+        [InfoBox ("如果不分首版本和最新版本，都填相同的版本号即可")]
+        [ShowInInspector, DictionaryDrawerSettings (KeyLabel = "APP版本" , ValueLabel = "资源版本")]
         public Dictionary<string , ClientResVerVo> resPackageVerDict = new Dictionary<string , ClientResVerVo> ();
 
         [Space (10)]

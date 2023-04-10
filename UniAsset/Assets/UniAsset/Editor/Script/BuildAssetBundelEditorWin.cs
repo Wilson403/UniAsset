@@ -3,12 +3,15 @@ using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UniAsset;
+using UnityEngine;
 
 namespace UniAssetEditor
 {
     class AssetBundleSettingVo
     {
         [LabelText ("客户端版本")]
+        [SuffixLabel("和PlayerSetting保持同步")]
+        [ReadOnly]
         public string appVer = "1.0";
 
         [LabelText ("资源包版本")]
@@ -23,13 +26,14 @@ namespace UniAssetEditor
         public static void Open ()
         {
             var win = GetWindow<BuildAssetBundelEditorWin> ("构建AssetBundle" , true);
-            var rect = GUIHelper.GetEditorWindowRect ().AlignCenter (300 , 600);
+            var rect = GUIHelper.GetEditorWindowRect ().AlignCenter (300 , 200);
             win.position = rect;
         }
 
         protected override void OnEnable ()
         {
             base.OnEnable ();
+            vo.appVer = Application.version;
         }
 
         [LabelText ("版本设置")]
