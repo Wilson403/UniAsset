@@ -6,13 +6,13 @@ using UnityEngine;
 namespace UniAsset
 {
     /// <summary>
-    /// 该资源管理器仅适用于Editor下的开发调试
+    /// 该资源加载器仅适用于Editor下的开发调试
     /// </summary>
-    class AssetDataBaseResMgr : AResMgr
+    class AssetDataBaseResLoader : BaseResLoader
     {
         string _assetRoot;
 
-        public AssetDataBaseResMgr (string assetRoot)
+        public AssetDataBaseResLoader (string assetRoot)
         {
 #if !UNITY_EDITOR
         throw new Exception("AssetDataBaseResMgr仅在Editor模式下可用");
@@ -74,7 +74,7 @@ namespace UniAsset
             return new string [0];
         }
 
-        public override T Load<T> (string abName , string assetName)
+        public override AssetInfo<T> Load<T> (string abName , string assetName)
         {
 #if UNITY_EDITOR            
             string path = AssetBundlePath2ResourcePath (abName , assetName);
@@ -83,9 +83,9 @@ namespace UniAsset
             {
                 Debug.LogErrorFormat ("资源不存在：{0}" , path);
             }
-            return asset;
+            return new AssetInfo<T> (asset);
 #else
-        return default(T);
+        return default;
 #endif
         }
 

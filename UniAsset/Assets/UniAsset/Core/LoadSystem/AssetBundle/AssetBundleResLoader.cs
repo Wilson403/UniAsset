@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace UniAsset
 {
-    public class AssetBundleResMgr : AResMgr
+    public class AssetBundleResLoader : BaseResLoader
     {
         /// <summary>
         /// 资源描述
@@ -19,7 +19,7 @@ namespace UniAsset
         /// </summary>
         Dictionary<string , AssetBundle> _loadedABDic;
 
-        public AssetBundleResMgr (string manifestFilePath)
+        public AssetBundleResLoader (string manifestFilePath)
         {
             try
             {
@@ -44,16 +44,11 @@ namespace UniAsset
         /// 让已加载的AB资源字典继承源资源管理器
         /// </summary>
         /// <param name="source"></param>
-        internal void Inherit (AssetBundleResMgr source)
+        internal void Inherit (AssetBundleResLoader source)
         {
             _loadedABDic = source._loadedABDic;
         }
 
-        /// <summary>
-        /// 如果
-        /// </summary>
-        /// <param name="abName"></param>
-        /// <returns></returns>
         void MakeABNameNotEmpty (ref string abName)
         {
             if ( string.IsNullOrEmpty (abName) )
@@ -70,7 +65,7 @@ namespace UniAsset
             return dependList;
         }
 
-        public override T Load<T> (string abName , string assetName)
+        public override AssetInfo<T> Load<T> (string abName , string assetName)
         {
             MakeABNameNotEmpty (ref abName);
             abName = ABNameWithExtension (abName);
@@ -80,7 +75,7 @@ namespace UniAsset
             {
                 Debug.LogErrorFormat ("获取的资源不存在： AssetBundle: {0}  Asset: {1}" , abName , assetName);
             }
-            return asset;
+            return new AssetInfo<T> (asset);
         }
 
         public override void LoadAsync (string abName , string assetName , Action<UnityEngine.Object> onLoaded , Action<float> onProgress = null)
@@ -134,8 +129,7 @@ namespace UniAsset
                 AssetBundle ab = _loadedABDic [abName];
                 _loadedABDic.Remove (abName);
                 ab.Unload (isUnloadAllLoaded);
-                //Debug.LogFormat("释放AB：{0}", abName);
-
+                Debug.LogFormat ("释放AB：{0}" , abName);
                 if ( isUnloadDepends )
                 {
                     string [] dependList = _manifest.GetAllDependencies (abName);
@@ -218,7 +212,6 @@ namespace UniAsset
             string [] dependList = _manifest.GetAllDependencies (abName);
             foreach ( string depend in dependList )
             {
-                //string dependPath = Path.Combine(_rootDir, depend);
                 if ( false == _loadedABDic.ContainsKey (depend) )
                 {
                     _loadedABDic [depend] = LoadAssetBundle (depend);

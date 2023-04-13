@@ -6,7 +6,7 @@ namespace UniAsset
     /// <summary>
     /// 资源加载抽象基类
     /// </summary>
-    public abstract class AResMgr
+    public abstract class BaseResLoader
     {
         /// <summary>
         /// 如果AB名称没有后缀，则加上后缀名
@@ -85,7 +85,7 @@ namespace UniAsset
         /// <param name="abName"></param>
         /// <param name="assetName"></param>
         /// <returns></returns>
-        public abstract T Load<T> (string abName , string assetName) where T : UnityEngine.Object;
+        public abstract AssetInfo<T> Load<T> (string abName , string assetName) where T : UnityEngine.Object;
 
         /// <summary>
         /// 异步获取一个资源

@@ -12,7 +12,7 @@ namespace UniAsset
     /// </summary>
     public class ResMgr : SafeSingleton<ResMgr>
     {
-        AResMgr _mgr;
+        private BaseResLoader _loader;
 
         /// <summary>
         /// 资源根目录
@@ -21,7 +21,7 @@ namespace UniAsset
         {
             get
             {
-                return _mgr.RootDir;
+                return _loader.RootDir;
             }
         }
 
@@ -37,18 +37,18 @@ namespace UniAsset
                 case ResLoadMode.REMOTE_ASSET_BUNDLE:
                 case ResLoadMode.LOCAL_ASSET_BUNDLE:
                     string manifestFilePath = FileSystem.CombinePaths (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot , UniAssetConst.AB_DIR_NAME , UniAssetConst.AssetBundleManifestName);
-                    AssetBundleResMgr newMgr = new AssetBundleResMgr (manifestFilePath);
-                    if ( _mgr != null && _mgr is AssetBundleResMgr )
+                    AssetBundleResLoader newMgr = new AssetBundleResLoader (manifestFilePath);
+                    if ( _loader != null && _loader is AssetBundleResLoader )
                     {
                         //替换旧的需要继承一下已加载字典
-                        newMgr.Inherit (_mgr as AssetBundleResMgr);
+                        newMgr.Inherit (_loader as AssetBundleResLoader);
                     }
-                    _mgr = newMgr;
+                    _loader = newMgr;
                     Debug.Log ($"初始化资源管理器... 资源来源：[AssetBundle]  Manifest路径：{manifestFilePath}");
                     break;
 
                 case ResLoadMode.ASSET_DATA_BASE:
-                    _mgr = new AssetDataBaseResMgr (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot);
+                    _loader = new AssetDataBaseResLoader (UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot);
                     Debug.Log ($"初始化资源管理器... 资源来源：[AssetDataBase] 资源根目录：{UniAssetRuntime.Ins.ResInitializeParameters.AssetRoot}");
                     break;
             }
@@ -76,7 +76,7 @@ namespace UniAsset
         /// <returns></returns>
         public string [] GetDepends (string abName)
         {
-            return _mgr.GetDepends (abName);
+            return _loader.GetDepends (abName);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace UniAsset
         /// <param name="isUnloadDepends">是否卸载关联的资源</param>
         public void Unload (string abName , bool isUnloadAllLoaded = false , bool isUnloadDepends = true)
         {
-            _mgr.Unload (abName , isUnloadAllLoaded , isUnloadDepends);
+            _loader.Unload (abName , isUnloadAllLoaded , isUnloadDepends);
         }
 
         /// <summary>
@@ -96,17 +96,17 @@ namespace UniAsset
         /// <param name="isUnloadAllLoaded">是否卸载Hierarchy中的资源</param>
         public void UnloadAll (bool isUnloadAllLoaded = false)
         {
-            _mgr.UnloadAll (isUnloadAllLoaded);
+            _loader.UnloadAll (isUnloadAllLoaded);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="abName">资源包名称</param>
-        /// <param name="assetName">资源名称</param>
+        /// <param name="abName"></param>
+        /// <param name="assetName"></param>
         /// <returns></returns>
-        public T Load<T> (string abName , string assetName) where T : UnityEngine.Object
+        public AssetInfo<T> Load<T> (string abName , string assetName) where T : UnityEngine.Object
         {
             // 如果任一路径值无效，那么返回空值
             if ( string.IsNullOrEmpty (abName) || string.IsNullOrEmpty (assetName) )
@@ -114,17 +114,17 @@ namespace UniAsset
                 return null;
             };
 
-            T result = null;
+            AssetInfo<T> result = null;
             try
             {
-                result = _mgr.Load<T> (abName , assetName);
+                result = _loader.Load<T> (abName , assetName);
             }
             catch ( Exception e )
             {
-                Debug.LogError ($"LoadRes过程中捕获到一个错误，_mgr:{_mgr},abName:{abName},assetName:{assetName},详细信息:{e}");
+                Debug.LogError ($"LoadRes过程中捕获到一个错误，_mgr:{_loader},abName:{abName},assetName:{assetName},详细信息:{e}");
             }
 
-            if ( !result )
+            if ( result == null || !result.asset )
             {
                 Debug.LogError ($"不存在资源：AB[{abName}] RES[{assetName}]");
             };
@@ -143,16 +143,16 @@ namespace UniAsset
         /// <param name="error"></param>
         public void LoadScene (string abName , string assetName , LoadSceneMode loadSceneMode = LoadSceneMode.Single , Action complete = null , Action<float> process = null , Action<string> error = null)
         {
-            _mgr.LoadScene (abName , assetName , loadSceneMode , complete , process , error);
+            _loader.LoadScene (abName , assetName , loadSceneMode , complete , process , error);
         }
 
         /// <summary>
         /// 通过资源路径加载资源
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="assetPath">资源的路径</param>
+        /// <param name="assetPath"></param>
         /// <returns></returns>
-        public T Load<T> (string assetPath) where T : UnityEngine.Object
+        public AssetInfo<T> Load<T> (string assetPath) where T : UnityEngine.Object
         {
             string abName;
             string assetName;
@@ -170,7 +170,7 @@ namespace UniAsset
         /// <param name="onProgress"></param>
         public void LoadAsync (string abName , string assetName , Action<UnityEngine.Object> onLoaded , Action<float> onProgress = null)
         {
-            _mgr.LoadAsync (abName , assetName , onLoaded , onProgress);
+            _loader.LoadAsync (abName , assetName , onLoaded , onProgress);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace UniAsset
             string abName;
             string assetName;
             SeparateAssetPath (assetPath , out abName , out assetName);
-            _mgr.LoadAsync (abName , assetName , onLoaded , onProgress);
+            _loader.LoadAsync (abName , assetName , onLoaded , onProgress);
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace UniAsset
 
         public bool AssetIsExists (string abName , string assetName)
         {
-            return _mgr.AssetIsExists (abName , assetName);
+            return _loader.AssetIsExists (abName , assetName);
         }
     }
 }
