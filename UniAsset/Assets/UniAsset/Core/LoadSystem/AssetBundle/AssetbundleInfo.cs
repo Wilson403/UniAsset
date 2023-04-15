@@ -1,9 +1,16 @@
-﻿namespace UniAsset
+﻿using UnityEngine;
+
+namespace UniAsset
 {
-    public class AssetbundleInfo<T> : AssetInfo<T> where T : UnityEngine.Object
+    public class AssetbundleInfo
     {
-        public AssetbundleInfo (T asset) : base (asset)
+        public readonly AssetBundle assetBundle;
+        public readonly string assetBundleName;
+
+        public AssetbundleInfo (AssetBundle assetBundle , string assetBundleName)
         {
+            this.assetBundle = assetBundle;
+            this.assetBundleName = assetBundleName;
         }
     }
 }

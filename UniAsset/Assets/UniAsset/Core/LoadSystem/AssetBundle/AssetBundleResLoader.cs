@@ -17,14 +17,14 @@ namespace UniAsset
         /// <summary>
         /// 已加载的AB资源字典
         /// </summary>
-        Dictionary<string , AssetBundle> _loadedABDic;
+        Dictionary<string , AssetbundleInfo> _loadedABDic;
 
         public AssetBundleResLoader (string manifestFilePath)
         {
             try
             {
                 UnloadAll ();
-                _loadedABDic = new Dictionary<string , AssetBundle> ();
+                _loadedABDic = new Dictionary<string , AssetbundleInfo> ();
                 RootDir = FileSystem.StandardizeBackslashSeparator (Path.GetDirectoryName (manifestFilePath));
                 AssetBundle ab = AssetBundle.LoadFromFile (manifestFilePath);
                 _manifest = ab.LoadAsset<AssetBundleManifest> ("AssetBundleManifest");
@@ -69,7 +69,7 @@ namespace UniAsset
         {
             MakeABNameNotEmpty (ref abName);
             abName = ABNameWithExtension (abName);
-            AssetBundle ab = LoadAssetBundle (abName);
+            AssetBundle ab = LoadAssetBundle (abName).assetBundle;
             T asset = ab.LoadAsset<T> (assetName);
             if ( null == asset )
             {
@@ -82,7 +82,7 @@ namespace UniAsset
         {
             MakeABNameNotEmpty (ref abName);
             abName = ABNameWithExtension (abName);
-            AssetBundle ab = LoadAssetBundle (abName);
+            AssetBundle ab = LoadAssetBundle (abName).assetBundle;
             UniAssetRuntime.Ins.StartCoroutine (LoadAsync (ab , assetName , onLoaded , onProgress));
         }
 
@@ -108,7 +108,7 @@ namespace UniAsset
         {
             MakeABNameNotEmpty (ref abName);
             abName = ABNameWithExtension (abName);
-            AssetBundle ab = LoadAssetBundle (abName);
+            AssetBundle ab = LoadAssetBundle (abName).assetBundle;
             string [] sceneNameArray = ab.GetAllScenePaths ();
             for ( int i = 0 ; i < sceneNameArray.Length ; i++ )
             {
@@ -126,9 +126,9 @@ namespace UniAsset
             abName = ABNameWithExtension (abName);
             if ( _loadedABDic.ContainsKey (abName) )
             {
-                AssetBundle ab = _loadedABDic [abName];
+                AssetbundleInfo ab = _loadedABDic [abName];
                 _loadedABDic.Remove (abName);
-                ab.Unload (isUnloadAllLoaded);
+                ab.assetBundle.Unload (isUnloadAllLoaded);
                 Debug.LogFormat ("释放AB：{0}" , abName);
                 if ( isUnloadDepends )
                 {
@@ -152,7 +152,7 @@ namespace UniAsset
         /// <returns></returns>
         bool CheckDependencies (string ab)
         {
-            foreach ( KeyValuePair<string , AssetBundle> loadedEntry in _loadedABDic )
+            foreach ( KeyValuePair<string , AssetbundleInfo> loadedEntry in _loadedABDic )
             {
                 string [] entryDepends = _manifest.GetAllDependencies (loadedEntry.Key);
                 foreach ( string entryDepend in entryDepends )
@@ -170,9 +170,9 @@ namespace UniAsset
         {
             if ( null != _loadedABDic )
             {
-                foreach ( AssetBundle cached in _loadedABDic.Values )
+                foreach ( AssetbundleInfo cached in _loadedABDic.Values )
                 {
-                    cached.Unload (isUnloadAllLoaded);
+                    cached.assetBundle.Unload (isUnloadAllLoaded);
                 }
                 _loadedABDic.Clear ();
             }
@@ -185,7 +185,7 @@ namespace UniAsset
         /// </summary>
         /// <param name="abName"></param>
         /// <returns></returns>
-        private AssetBundle LoadAssetBundle (string abName)
+        private AssetbundleInfo LoadAssetBundle (string abName)
         {
             MakeABNameNotEmpty (ref abName);
             abName = ABNameWithExtension (abName);
@@ -197,14 +197,14 @@ namespace UniAsset
                 return null;
             }
 
-            AssetBundle ab;
+            AssetbundleInfo ab;
             if ( _loadedABDic.ContainsKey (abName) )
             {
                 ab = _loadedABDic [abName];
             }
             else
             {
-                ab = AssetBundle.LoadFromFile (abPath);
+                ab = new AssetbundleInfo (AssetBundle.LoadFromFile (abPath) , abName);
                 _loadedABDic [abName] = ab;
             }
 
@@ -248,7 +248,7 @@ namespace UniAsset
             try
             {
                 MakeABNameNotEmpty (ref abName);
-                return LoadAssetBundle (ABNameWithExtension (abName)).Contains (assetName);
+                return LoadAssetBundle (ABNameWithExtension (abName)).assetBundle.Contains (assetName);
             }
             catch ( Exception e )
             {

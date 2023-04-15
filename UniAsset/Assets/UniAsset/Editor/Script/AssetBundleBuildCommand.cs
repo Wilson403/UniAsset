@@ -267,10 +267,15 @@ namespace UniAssetEditor
                 Directory.CreateDirectory (UniAssetConst.ASSET_BUNDLE_CACHE_DIR);
             }
 
+            BuildAssetBundleOptions assetBundleOptions = BuildAssetBundleOptions.ChunkBasedCompression
+                | BuildAssetBundleOptions.DeterministicAssetBundle
+                | BuildAssetBundleOptions.DisableWriteTypeTree
+                | BuildAssetBundleOptions.DisableLoadAssetByFileNameWithExtension;
+
             AssetBundleManifest = BuildPipeline.BuildAssetBundles (
                 outputPath: UniAssetConst.ASSET_BUNDLE_CACHE_DIR ,
                 builds: abbList ,
-                assetBundleOptions: BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle ,
+                assetBundleOptions: assetBundleOptions ,
                 targetPlatform: UniAssetEditorConst.BUILD_PLATFORM);
 
             if ( null != AssetBundleManifest )
