@@ -106,7 +106,7 @@ namespace UniAsset
         /// <param name="abName"></param>
         /// <param name="assetName"></param>
         /// <returns></returns>
-        public AssetInfo<T> Load<T> (string abName , string assetName) where T : UnityEngine.Object
+        public AssetInfo Load<T> (string abName , string assetName) where T : UnityEngine.Object
         {
             // 如果任一路径值无效，那么返回空值
             if ( string.IsNullOrEmpty (abName) || string.IsNullOrEmpty (assetName) )
@@ -114,7 +114,7 @@ namespace UniAsset
                 return null;
             };
 
-            AssetInfo<T> result = null;
+            AssetInfo result = null;
             try
             {
                 result = _loader.Load<T> (abName , assetName);
@@ -152,7 +152,7 @@ namespace UniAsset
         /// <typeparam name="T"></typeparam>
         /// <param name="assetPath"></param>
         /// <returns></returns>
-        public AssetInfo<T> Load<T> (string assetPath) where T : UnityEngine.Object
+        public AssetInfo Load<T> (string assetPath) where T : UnityEngine.Object
         {
             string abName;
             string assetName;
@@ -168,7 +168,7 @@ namespace UniAsset
         /// <param name="assetName">资源名称</param>
         /// <param name="onLoaded"></param>
         /// <param name="onProgress"></param>
-        public void LoadAsync (string abName , string assetName , Action<UnityEngine.Object> onLoaded , Action<float> onProgress = null)
+        public void LoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress = null)
         {
             _loader.LoadAsync (abName , assetName , onLoaded , onProgress);
         }
@@ -180,7 +180,7 @@ namespace UniAsset
         /// <param name="assetPath">资源路径</param>        
         /// <param name="onLoaded"></param>
         /// <param name="onProgress"></param>
-        public void LoadAsync (string assetPath , Action<UnityEngine.Object> onLoaded , Action<float> onProgress = null)
+        public void LoadAsync (string assetPath , Action<AssetInfo> onLoaded , Action<float> onProgress = null)
         {
             string abName;
             string assetName;

@@ -74,7 +74,7 @@ namespace UniAsset
             return new string [0];
         }
 
-        public override AssetInfo<T> Load<T> (string abName , string assetName)
+        public override AssetInfo Load<T> (string abName , string assetName)
         {
 #if UNITY_EDITOR            
             string path = AssetBundlePath2ResourcePath (abName , assetName);
@@ -83,18 +83,18 @@ namespace UniAsset
             {
                 Debug.LogErrorFormat ("资源不存在：{0}" , path);
             }
-            return new AssetInfo<T> (asset);
+            return new AssetInfo (asset);
 #else
         return default;
 #endif
         }
 
-        public override void LoadAsync (string abName , string assetName , Action<UnityEngine.Object> onLoaded , Action<float> onProgress = null)
+        public override void LoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress = null)
         {
             UniAssetRuntime.Ins.StartCoroutine (ResourceLoadAsync (AssetBundlePath2ResourcePath (abName , assetName) , onLoaded , onProgress));
         }
 
-        IEnumerator ResourceLoadAsync (string assetPath , Action<UnityEngine.Object> onLoaded , Action<float> onProgress)
+        IEnumerator ResourceLoadAsync (string assetPath , Action<AssetInfo> onLoaded , Action<float> onProgress)
         {
             if ( null != onProgress )
             {
@@ -109,7 +109,7 @@ namespace UniAsset
             UnityEngine.Object obj = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object> (assetPath);
             if ( null != onLoaded )
             {
-                onLoaded.Invoke (obj);
+                onLoaded.Invoke (new AssetInfo (obj));
             }
 #else
             onLoaded?.Invoke(null);

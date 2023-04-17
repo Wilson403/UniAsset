@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,19 +13,25 @@ namespace UniAsset
         /// <summary>
         /// 资源描述
         /// </summary>
-        AssetBundleManifest _manifest;
+        readonly AssetBundleManifest _manifest;
 
         /// <summary>
-        /// 已加载的AB资源字典
+        /// 已加载的AB字典
         /// </summary>
-        Dictionary<string , AssetbundleInfo> _loadedABDic;
+        Dictionary<string , AssetbundleInfo> _loadedAssetBundleDic;
+
+        /// <summary>
+        /// 已加载的Asset字典
+        /// </summary>
+        Dictionary<string , AssetInfo> _loadedAssetDic;
 
         public AssetBundleResLoader (string manifestFilePath)
         {
             try
             {
                 UnloadAll ();
-                _loadedABDic = new Dictionary<string , AssetbundleInfo> ();
+                _loadedAssetBundleDic = new Dictionary<string , AssetbundleInfo> ();
+                _loadedAssetDic = new Dictionary<string , AssetInfo> ();
                 RootDir = FileSystem.StandardizeBackslashSeparator (Path.GetDirectoryName (manifestFilePath));
                 AssetBundle ab = AssetBundle.LoadFromFile (manifestFilePath);
                 _manifest = ab.LoadAsset<AssetBundleManifest> ("AssetBundleManifest");
@@ -46,7 +53,7 @@ namespace UniAsset
         /// <param name="source"></param>
         internal void Inherit (AssetBundleResLoader source)
         {
-            _loadedABDic = source._loadedABDic;
+            _loadedAssetBundleDic = source._loadedAssetBundleDic;
         }
 
         void MakeABNameNotEmpty (ref string abName)
@@ -65,43 +72,71 @@ namespace UniAsset
             return dependList;
         }
 
-        public override AssetInfo<T> Load<T> (string abName , string assetName)
+        private AssetInfo GetAssetInfo (string abName , string assetName)
         {
-            MakeABNameNotEmpty (ref abName);
-            abName = ABNameWithExtension (abName);
-            AssetBundle ab = LoadAssetBundle (abName).assetBundle;
-            T asset = ab.LoadAsset<T> (assetName);
-            if ( null == asset )
+            string key = FileSystem.CombinePaths (abName , assetName);
+            if ( !_loadedAssetDic.TryGetValue (key , out AssetInfo assetInfo) )
             {
-                Debug.LogErrorFormat ("获取的资源不存在： AssetBundle: {0}  Asset: {1}" , abName , assetName);
-            }
-            return new AssetInfo<T> (asset);
-        }
-
-        public override void LoadAsync (string abName , string assetName , Action<UnityEngine.Object> onLoaded , Action<float> onProgress = null)
-        {
-            MakeABNameNotEmpty (ref abName);
-            abName = ABNameWithExtension (abName);
-            AssetBundle ab = LoadAssetBundle (abName).assetBundle;
-            UniAssetRuntime.Ins.StartCoroutine (LoadAsync (ab , assetName , onLoaded , onProgress));
-        }
-
-        IEnumerator LoadAsync (AssetBundle ab , string assetName , Action<UnityEngine.Object> onLoaded , Action<float> onProgress)
-        {
-            AssetBundleRequest abr = ab.LoadAssetAsync<GameObject> (assetName);
-
-            do
-            {
-                if ( onProgress != null )
+                assetInfo = new AssetInfo ();
+                if ( _loadedAssetBundleDic.ContainsKey (abName) )
                 {
-                    onProgress.Invoke (abr.progress);
+                    assetInfo.bundleInfo = _loadedAssetBundleDic [abName];
                 }
-                yield return new WaitForEndOfFrame ();
+                _loadedAssetDic [key] = assetInfo;
             }
-            while ( false == abr.isDone );
+            return assetInfo;
+        }
 
-            //加载完成
-            onLoaded.Invoke (abr.asset);
+        public override AssetInfo Load<T> (string abName , string assetName)
+        {
+            MakeABNameNotEmpty (ref abName);
+            AssetInfo assetInfo = GetAssetInfo (abName , assetName);
+            abName = ABNameWithExtension (abName);
+
+            if ( assetInfo.RefCount == 0 )
+            {
+                AssetBundle ab = LoadAssetBundle (abName).assetBundle;
+                T asset = ab.LoadAsset<T> (assetName);
+                if ( null == asset )
+                {
+                    Debug.LogError ($"获取的资源不存在： AssetBundle: {abName}  Asset: {assetName}");
+                }
+                assetInfo.asset = asset;
+            }
+            assetInfo.AddRefCount ();
+            return assetInfo;
+        }
+
+        public override void LoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress = null)
+        {
+            UniAssetRuntime.Ins.StartCoroutine (LoadAsyncByCoroutine (abName , assetName , onLoaded , onProgress));
+        }
+
+        IEnumerator LoadAsyncByCoroutine (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress)
+        {
+            MakeABNameNotEmpty (ref abName);
+            AssetInfo assetInfo = GetAssetInfo (abName , assetName);
+            abName = ABNameWithExtension (abName);
+
+            if ( assetInfo.RefCount == 0 )
+            {
+                AssetBundle ab = LoadAssetBundle (abName).assetBundle;
+                AssetBundleRequest abr = ab.LoadAssetAsync<GameObject> (assetName);
+
+                do
+                {
+                    if ( onProgress != null )
+                    {
+                        onProgress.Invoke (abr.progress);
+                    }
+                    yield return new WaitForEndOfFrame ();
+                }
+                while ( false == abr.isDone );
+                assetInfo.asset = abr.asset;
+            }
+
+            assetInfo.AddRefCount ();
+            onLoaded.Invoke (assetInfo);
         }
 
         public override void LoadScene (string abName , string assetName , LoadSceneMode loadSceneMode = LoadSceneMode.Single , Action complete = null , Action<float> process = null , Action<string> error = null)
@@ -124,10 +159,10 @@ namespace UniAsset
         {
             MakeABNameNotEmpty (ref abName);
             abName = ABNameWithExtension (abName);
-            if ( _loadedABDic.ContainsKey (abName) )
+            if ( _loadedAssetBundleDic.ContainsKey (abName) )
             {
-                AssetbundleInfo ab = _loadedABDic [abName];
-                _loadedABDic.Remove (abName);
+                AssetbundleInfo ab = _loadedAssetBundleDic [abName];
+                _loadedAssetBundleDic.Remove (abName);
                 ab.assetBundle.Unload (isUnloadAllLoaded);
                 Debug.LogFormat ("释放AB：{0}" , abName);
                 if ( isUnloadDepends )
@@ -152,7 +187,7 @@ namespace UniAsset
         /// <returns></returns>
         bool CheckDependencies (string ab)
         {
-            foreach ( KeyValuePair<string , AssetbundleInfo> loadedEntry in _loadedABDic )
+            foreach ( KeyValuePair<string , AssetbundleInfo> loadedEntry in _loadedAssetBundleDic )
             {
                 string [] entryDepends = _manifest.GetAllDependencies (loadedEntry.Key);
                 foreach ( string entryDepend in entryDepends )
@@ -168,13 +203,13 @@ namespace UniAsset
 
         public override void UnloadAll (bool isUnloadAllLoaded = false)
         {
-            if ( null != _loadedABDic )
+            if ( null != _loadedAssetBundleDic )
             {
-                foreach ( AssetbundleInfo cached in _loadedABDic.Values )
+                foreach ( AssetbundleInfo cached in _loadedAssetBundleDic.Values )
                 {
                     cached.assetBundle.Unload (isUnloadAllLoaded);
                 }
-                _loadedABDic.Clear ();
+                _loadedAssetBundleDic.Clear ();
             }
 
             ResMgr.Ins.DoGC ();
@@ -198,26 +233,28 @@ namespace UniAsset
             }
 
             AssetbundleInfo ab;
-            if ( _loadedABDic.ContainsKey (abName) )
+            if ( _loadedAssetBundleDic.ContainsKey (abName) )
             {
-                ab = _loadedABDic [abName];
+                ab = _loadedAssetBundleDic [abName];
             }
             else
             {
                 ab = new AssetbundleInfo (AssetBundle.LoadFromFile (abPath) , abName);
-                _loadedABDic [abName] = ab;
+                _loadedAssetBundleDic [abName] = ab;
             }
 
             //依赖检查
             string [] dependList = _manifest.GetAllDependencies (abName);
             foreach ( string depend in dependList )
             {
-                if ( false == _loadedABDic.ContainsKey (depend) )
+                if ( false == _loadedAssetBundleDic.ContainsKey (depend) )
                 {
-                    _loadedABDic [depend] = LoadAssetBundle (depend);
+                    AssetbundleInfo depAssetBundle = LoadAssetBundle (depend);
+                    _loadedAssetBundleDic [depend] = depAssetBundle;
+                    ab.Dependencys.Add (depAssetBundle);
+                    depAssetBundle.Dependents.Add (ab);
                 }
             }
-
             return ab;
         }
 

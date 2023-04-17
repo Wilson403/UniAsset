@@ -27,18 +27,19 @@ public class LocalAssetBundle : MonoBehaviour
         UniAssetRuntime.Ins.StartPreload ().Then (() =>
         {
             var prefab01 = ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01").asset;
-            var obj1 = GameObject.Instantiate (prefab01);
 
-            var image1 = ResMgr.Ins.Load<Sprite> (AssetBundleName.IMAGE_SKILL , "type_hero_04_v3").asset;
-            var image2 = ResMgr.Ins.Load<Sprite> (AssetBundleName.IMAGE_SKILL , "type_hero_04_v3").asset;
+            //var obj1 = GameObject.Instantiate (prefab01);
 
-            obj1.GetComponent<Image> ().sprite = image1;
-            Debug.LogWarning ($"{image1.GetHashCode()} = {image2.GetHashCode()}");
+            //var image1 = ResMgr.Ins.Load<Sprite> (AssetBundleName.IMAGE_SKILL , "type_hero_04_v3").asset;
+            //var image2 = ResMgr.Ins.Load<Sprite> (AssetBundleName.IMAGE_SKILL , "type_hero_04_v3").asset;
+
+            //obj1.GetComponent<Image> ().sprite = image1;
+            //Debug.LogWarning ($"{image1.GetHashCode()} = {image2.GetHashCode()}");
 
 
-            ResMgr.Ins.Unload (AssetBundleName.IMAGE_SKILL , false , false);
-            image1 = ResMgr.Ins.Load<Sprite> (AssetBundleName.IMAGE_SKILL , "type_hero_04_v3").asset;
-            Debug.LogWarning ($"{image1.GetHashCode ()} = {image2.GetHashCode ()}");
+            //ResMgr.Ins.Unload (AssetBundleName.IMAGE_SKILL , false , false);
+            //image1 = ResMgr.Ins.Load<Sprite> (AssetBundleName.IMAGE_SKILL , "type_hero_04_v3").asset;
+            //Debug.LogWarning ($"{image1.GetHashCode ()} = {image2.GetHashCode ()}");
             //ResMgr.Ins.Unload (AssetBundleName.PREFAB_OTHER_PREFAB_01 , false , false);
             //ResMgr.Ins.Unload (AssetBundleName.PREFAB_OTHER_PREFAB_01 , false , false);
         });

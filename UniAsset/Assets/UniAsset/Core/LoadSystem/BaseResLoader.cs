@@ -85,7 +85,7 @@ namespace UniAsset
         /// <param name="abName"></param>
         /// <param name="assetName"></param>
         /// <returns></returns>
-        public abstract AssetInfo<T> Load<T> (string abName , string assetName) where T : UnityEngine.Object;
+        public abstract AssetInfo Load<T> (string abName , string assetName) where T : UnityEngine.Object;
 
         /// <summary>
         /// 异步获取一个资源
@@ -95,7 +95,7 @@ namespace UniAsset
         /// <param name="assetName"></param>
         /// <param name="onLoaded"></param>
         /// <param name="onProgress"></param>
-        public abstract void LoadAsync (string abName , string assetName , Action<UnityEngine.Object> onLoaded , Action<float> onProgress = null);
+        public abstract void LoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress = null);
 
 
         /// <summary>
