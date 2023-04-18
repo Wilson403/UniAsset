@@ -38,6 +38,17 @@ namespace UniAsset
         }
 
         /// <summary>
+        /// 获取资源信息
+        /// </summary>
+        /// <param name="abName"></param>
+        /// <param name="assetName"></param>
+        /// <returns></returns>
+        public virtual AssetInfo GetAssetInfo (string abName , string assetName)
+        {
+            return default;
+        }
+
+        /// <summary>
         /// 加载场景
         /// </summary>
         /// <param name="abName"></param>

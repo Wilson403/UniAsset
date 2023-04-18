@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UniAsset.LocalDataModel;
 
 namespace UniAsset
 {
@@ -186,6 +185,17 @@ namespace UniAsset
             string assetName;
             SeparateAssetPath (assetPath , out abName , out assetName);
             _loader.LoadAsync (abName , assetName , onLoaded , onProgress);
+        }
+
+        /// <summary>
+        /// 获取资源信息
+        /// </summary>
+        /// <param name="abName"></param>
+        /// <param name="assetName"></param>
+        /// <returns></returns>
+        public AssetInfo GetAssetInfo (string abName , string assetName)
+        {
+            return _loader.GetAssetInfo (abName , assetName);
         }
 
         /// <summary>

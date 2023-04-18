@@ -4,9 +4,9 @@ using UnityEngine;
 namespace UniAsset
 {
     /// <summary>
-    /// Assetbundle信息
+    /// 资源包体信息
     /// </summary>
-    public class AssetbundleInfo
+    public class BundleInfo
     {
         /// <summary>
         /// 对应的AssetBundle对象
@@ -21,24 +21,24 @@ namespace UniAsset
         /// <summary>
         /// 依赖其它的资源集合
         /// </summary>
-        public readonly HashSet<AssetbundleInfo> Dependencys;
+        public readonly HashSet<BundleInfo> Dependencys;
 
         /// <summary>
         /// 被其它资源依赖集合
         /// </summary>
-        public readonly HashSet<AssetbundleInfo> Dependents;
+        public readonly HashSet<BundleInfo> Dependents;
 
         /// <summary>
         /// Asset引用集合
         /// </summary>
         public readonly HashSet<AssetInfo> ReferenceAssets;
 
-        public AssetbundleInfo (AssetBundle assetBundle , string assetBundleName)
+        public BundleInfo (AssetBundle assetBundle , string assetBundleName)
         {
             this.assetBundle = assetBundle;
             this.assetBundleName = assetBundleName;
-            Dependencys = new HashSet<AssetbundleInfo> ();
-            Dependents = new HashSet<AssetbundleInfo> ();
+            Dependencys = new HashSet<BundleInfo> ();
+            Dependents = new HashSet<BundleInfo> ();
             ReferenceAssets = new HashSet<AssetInfo> ();
         }
 
