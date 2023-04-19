@@ -58,6 +58,27 @@ namespace UniAsset
         public void SubRefercingAsset (AssetInfo assetInfo)
         {
             ReferenceAssets.Remove (assetInfo);
+            if ( IsCanUnload () )
+            {
+                //穷举该资源包的依赖项，告诉对方我要被释放了，不会再依赖你了
+                foreach ( var item in Dependencys )
+                {
+                    if ( item.Dependents.Contains (this) ) 
+                    {
+                        item.Dependents.Remove (this);
+                    }
+                }
+                ResMgr.Ins.Unload (assetBundleName , false);
+            }
+        }
+
+        /// <summary>
+        /// 是否可以卸载
+        /// </summary>
+        /// <returns></returns>
+        public bool IsCanUnload ()
+        {
+            return ReferenceAssets.Count == 0 && Dependents.Count == 0;
         }
     }
 }

@@ -83,7 +83,9 @@ namespace UniAsset
             {
                 Debug.LogErrorFormat ("资源不存在：{0}" , path);
             }
-            return new AssetInfo (asset);
+            var assetInfo = new AssetInfo (abName , assetName);
+            assetInfo.Asset = asset;
+            return assetInfo;
 #else
         return default;
 #endif
@@ -91,11 +93,12 @@ namespace UniAsset
 
         public override void LoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress = null)
         {
-            UniAssetRuntime.Ins.StartCoroutine (ResourceLoadAsync (AssetBundlePath2ResourcePath (abName , assetName) , onLoaded , onProgress));
+            UniAssetRuntime.Ins.StartCoroutine (ResourceLoadAsync (abName , assetName , onLoaded , onProgress));
         }
 
-        IEnumerator ResourceLoadAsync (string assetPath , Action<AssetInfo> onLoaded , Action<float> onProgress)
+        IEnumerator ResourceLoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress)
         {
+            var assetPath = AssetBundlePath2ResourcePath (abName , assetName);
             if ( null != onProgress )
             {
                 onProgress.Invoke (0);
@@ -109,19 +112,21 @@ namespace UniAsset
             UnityEngine.Object obj = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object> (assetPath);
             if ( null != onLoaded )
             {
-                onLoaded.Invoke (new AssetInfo (obj));
+                var assetInfo = new AssetInfo (abName , assetName);
+                assetInfo.Asset = obj;
+                onLoaded.Invoke (assetInfo);
             }
 #else
             onLoaded?.Invoke(null);
 #endif
         }
 
-        public override void Unload (string abName , bool isUnloadAllLoaded = false , bool isUnloadDepends = true)
+        public override void Unload (string abName , bool isUnloadAllLoaded = false)
         {
             Resources.UnloadUnusedAssets ();
         }
 
-        public override void UnloadAll (bool isUnloadAllLoaded = false)
+        public override void UnloadAll ()
         {
             Resources.UnloadUnusedAssets ();
         }

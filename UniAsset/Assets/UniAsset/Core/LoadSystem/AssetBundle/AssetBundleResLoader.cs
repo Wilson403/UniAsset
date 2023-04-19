@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -77,26 +76,19 @@ namespace UniAsset
             string key = FileSystem.CombinePaths (abName , assetName);
             if ( !_loadedAssetDic.TryGetValue (key , out AssetInfo assetInfo) )
             {
-                assetInfo = new AssetInfo ();
-                assetInfo.abName = abName;
-                assetInfo.assetName = assetName;
-                if ( _loadedBundleDic.ContainsKey (abName) )
-                {
-                    assetInfo.bundleInfo = _loadedBundleDic [abName];
-                }
+                assetInfo = new AssetInfo (abName , assetName);
                 _loadedAssetDic [key] = assetInfo;
             }
             return assetInfo;
         }
 
-        void AddRefCount (AssetInfo assetInfo)
+        public override BundleInfo GetBundleInfo (string abName)
         {
-            //如果是GameObject类型且引用次数大于1，不在继续累计引用次数
-            if ( assetInfo.RefCount >= 1 && assetInfo.asset is GameObject )
+            if ( _loadedBundleDic.ContainsKey (abName) ) 
             {
-                return;
+                return _loadedBundleDic [abName];
             }
-            assetInfo.AddRefCount ();
+            return default;
         }
 
         public override AssetInfo Load<T> (string abName , string assetName)
@@ -106,7 +98,7 @@ namespace UniAsset
             abName = ABNameWithExtension (abName);
 
             //如果asset不存在，先从Bundle中加载到内存
-            if ( !assetInfo.asset )
+            if ( !assetInfo.Asset )
             {
                 AssetBundle ab = LoadAssetBundle (abName).assetBundle;
                 T asset = ab.LoadAsset<T> (assetName);
@@ -114,9 +106,8 @@ namespace UniAsset
                 {
                     Debug.LogError ($"获取的资源不存在： AssetBundle: {abName}  Asset: {assetName}");
                 }
-                assetInfo.asset = asset;
+                assetInfo.Asset = asset;
             }
-            AddRefCount (assetInfo);
             return assetInfo;
         }
 
@@ -131,11 +122,10 @@ namespace UniAsset
             AssetInfo assetInfo = GetAssetInfo (abName , assetName);
             abName = ABNameWithExtension (abName);
 
-            if ( !assetInfo.asset )
+            if ( !assetInfo.Asset )
             {
                 AssetBundle ab = LoadAssetBundle (abName).assetBundle;
                 AssetBundleRequest abr = ab.LoadAssetAsync<GameObject> (assetName);
-
                 do
                 {
                     if ( onProgress != null )
@@ -145,9 +135,8 @@ namespace UniAsset
                     yield return new WaitForEndOfFrame ();
                 }
                 while ( false == abr.isDone );
-                assetInfo.asset = abr.asset;
+                assetInfo.Asset = abr.asset;
             }
-            AddRefCount (assetInfo);
             onLoaded.Invoke (assetInfo);
         }
 
@@ -167,64 +156,53 @@ namespace UniAsset
             }
         }
 
-        public override void Unload (string abName , bool isUnloadAllLoaded = false , bool isUnloadDepends = true)
+        public override void Unload (string abName , bool isUnloadAllLoaded = false)
         {
             MakeABNameNotEmpty (ref abName);
             abName = ABNameWithExtension (abName);
             if ( _loadedBundleDic.ContainsKey (abName) )
             {
-                BundleInfo ab = _loadedBundleDic [abName];
+                BundleInfo bundleInfo = _loadedBundleDic [abName];
+                bundleInfo.assetBundle.Unload (isUnloadAllLoaded);
                 _loadedBundleDic.Remove (abName);
-                ab.assetBundle.Unload (isUnloadAllLoaded);
+
+                //穷举依赖项，如果可以卸载就一起卸载了
+                foreach ( var depBundleInfo in bundleInfo.Dependencys )
+                {
+                    if ( depBundleInfo.IsCanUnload () ) 
+                    {
+                        Unload (depBundleInfo.assetBundleName , false);
+                    }
+                }
+
+                Resources.UnloadUnusedAssets ();
                 Debug.LogFormat ("释放AB：{0}" , abName);
-                if ( isUnloadDepends )
-                {
-                    string [] dependList = _manifest.GetAllDependencies (abName);
-                    foreach ( string depend in dependList )
-                    {
-                        if ( false == CheckDependencies (depend) )
-                        {
-                            Unload (depend , isUnloadAllLoaded , isUnloadDepends);
-                        }
-                    }
-                }
             }
         }
 
-        /// <summary>
-        /// 检查ab资源是否被已加载的资源依赖
-        /// </summary>
-        /// <param name="ab"></param>
-        /// <param name="depend"></param>
-        /// <returns></returns>
-        bool CheckDependencies (string ab)
+        public override void UnloadAll ()
         {
-            foreach ( KeyValuePair<string , BundleInfo> loadedEntry in _loadedBundleDic )
+            if ( _loadedBundleDic == null ) 
             {
-                string [] entryDepends = _manifest.GetAllDependencies (loadedEntry.Key);
-                foreach ( string entryDepend in entryDepends )
-                {
-                    if ( ab == entryDepend )
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public override void UnloadAll (bool isUnloadAllLoaded = false)
-        {
-            if ( null != _loadedBundleDic )
-            {
-                foreach ( BundleInfo cached in _loadedBundleDic.Values )
-                {
-                    cached.assetBundle.Unload (isUnloadAllLoaded);
-                }
-                _loadedBundleDic.Clear ();
+                return;
             }
 
-            ResMgr.Ins.DoGC ();
+            List<string> abNames = new List<string> ();
+            foreach ( BundleInfo cached in _loadedBundleDic.Values )
+            {
+                if ( cached.IsCanUnload () )
+                {
+                    cached.assetBundle.Unload (false);
+                    abNames.Add (cached.assetBundleName);
+                }
+            }
+
+            for ( int i = 0 ; i < abNames.Count ; i++ )
+            {
+                _loadedBundleDic.Remove (abNames [i]);
+            }
+
+            Resources.UnloadUnusedAssets ();
         }
 
         /// <summary>

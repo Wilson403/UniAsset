@@ -59,16 +59,6 @@ namespace UniAsset
         }
 
         /// <summary>
-        /// 执行一次内存回收(该接口开销大，可能引起卡顿)
-        /// </summary>
-        public void DoGC ()
-        {
-            //移除没有引用的资源
-            Resources.UnloadUnusedAssets ();
-            GC.Collect ();
-        }
-
-        /// <summary>
         /// 得到AB资源的依赖
         /// </summary>
         /// <param name="abName"></param>
@@ -81,21 +71,19 @@ namespace UniAsset
         /// <summary>
         /// 卸载资源
         /// </summary>
-        /// <param name="abName">资源包名称</param>
-        /// <param name="isUnloadAllLoaded">是否卸载Hierarchy中的资源</param>
-        /// <param name="isUnloadDepends">是否卸载关联的资源</param>
-        public void Unload (string abName , bool isUnloadAllLoaded = false , bool isUnloadDepends = true)
+        /// <param name="abName"></param>
+        /// <param name="isUnloadAllLoaded"></param>
+        public void Unload (string abName , bool isUnloadAllLoaded = false)
         {
-            _loader.Unload (abName , isUnloadAllLoaded , isUnloadDepends);
+            _loader.Unload (abName , isUnloadAllLoaded);
         }
 
         /// <summary>
         /// 卸载所有资源
         /// </summary>
-        /// <param name="isUnloadAllLoaded">是否卸载Hierarchy中的资源</param>
-        public void UnloadAll (bool isUnloadAllLoaded = false)
+        public void UnloadAll ()
         {
-            _loader.UnloadAll (isUnloadAllLoaded);
+            _loader.UnloadAll ();
         }
 
         /// <summary>
@@ -123,7 +111,7 @@ namespace UniAsset
                 Debug.LogError ($"LoadRes过程中捕获到一个错误，_mgr:{_loader},abName:{abName},assetName:{assetName},详细信息:{e}");
             }
 
-            if ( result == null || !result.asset )
+            if ( result == null || !result.Asset )
             {
                 Debug.LogError ($"不存在资源：AB[{abName}] RES[{assetName}]");
             };
@@ -196,6 +184,16 @@ namespace UniAsset
         public AssetInfo GetAssetInfo (string abName , string assetName)
         {
             return _loader.GetAssetInfo (abName , assetName);
+        }
+
+        /// <summary>
+        /// 获取资源所在包体的信息
+        /// </summary>
+        /// <param name="abName"></param>
+        /// <returns></returns>
+        public BundleInfo GetBundleInfo (string abName)
+        {
+            return _loader.GetBundleInfo (abName);
         }
 
         /// <summary>

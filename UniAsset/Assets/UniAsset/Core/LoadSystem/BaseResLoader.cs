@@ -49,6 +49,16 @@ namespace UniAsset
         }
 
         /// <summary>
+        /// 获取资源所在包体的信息
+        /// </summary>
+        /// <param name="abName"></param>
+        /// <returns></returns>
+        public virtual BundleInfo GetBundleInfo (string abName)
+        {
+            return default;
+        }
+
+        /// <summary>
         /// 加载场景
         /// </summary>
         /// <param name="abName"></param>
@@ -80,14 +90,12 @@ namespace UniAsset
         /// </summary>
         /// <param name="abName"></param>
         /// <param name="isUnloadAllLoaded"></param>
-        /// <param name="isUnloadDepends"></param>
-        public abstract void Unload (string abName , bool isUnloadAllLoaded = false , bool isUnloadDepends = true);
+        public abstract void Unload (string abName , bool isUnloadAllLoaded = false);
 
         /// <summary>
-        /// 
+        /// 释放资源
         /// </summary>
-        /// <param name="isUnloadAllLoaded"></param>
-        public abstract void UnloadAll (bool isUnloadAllLoaded = false);
+        public abstract void UnloadAll ();
 
         /// <summary>
         /// 获取资源

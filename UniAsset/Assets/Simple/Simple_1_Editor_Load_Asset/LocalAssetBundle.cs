@@ -1,8 +1,5 @@
-﻿using System.Diagnostics;
-using UniAsset;
+﻿using UniAsset;
 using UnityEngine;
-using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
 public class LocalAssetBundle : MonoBehaviour
 {
@@ -26,8 +23,13 @@ public class LocalAssetBundle : MonoBehaviour
         UniAssetRuntime.Ins.Init (initializeParameters);
         UniAssetRuntime.Ins.StartPreload ().Then (() =>
         {
-            var prefab01 = ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01").Instantiate ();
-            Object.Instantiate (prefab01);
+            var assetInfo = ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01");
+            var obj01 = assetInfo.Instantiate ();
+            Object.Instantiate (obj01);
+
+            var imageInfo = ResMgr.Ins.Load<Sprite> (AssetBundleName.IMAGE_SKILL , "skill_c001_v3");
+            imageInfo.AddRefCount ();
+            imageInfo.SubRefCount ();
         });
     }
 }
