@@ -63,4 +63,6 @@ crashlytics-build.properties
 /UniAsset/Logs
 /UniAsset/obj
 /UniAsset/Packages
-/UniAsset/LibraryUniAsset
+/UniAsset/LibraryUniAsset/RuntimeCaches
+/UniAsset/LibraryUniAsset/Release
+/UniAsset/LibraryUniAsset/ReleaseCache
