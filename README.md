@@ -66,7 +66,7 @@ UniAsset/UniAsset/Assets/UnityResource：资源总目录，构建资源包时就
 ---
 
 
-## 如果使用
+## 如何使用
 
 ```c#
 ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01").Instantiate (); //加载并实例化一个GameObject
