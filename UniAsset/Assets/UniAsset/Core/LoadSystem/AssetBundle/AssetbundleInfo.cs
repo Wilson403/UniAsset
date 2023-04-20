@@ -31,7 +31,7 @@ namespace UniAsset
         /// <summary>
         /// Asset引用集合
         /// </summary>
-        public readonly HashSet<AssetInfo> ReferenceAssets;
+        public readonly HashSet<IAssetInfo> ReferenceAssets;
 
         public BundleInfo (AssetBundle assetBundle , string assetBundleName)
         {
@@ -39,14 +39,14 @@ namespace UniAsset
             this.assetBundleName = assetBundleName;
             Dependencys = new HashSet<BundleInfo> ();
             Dependents = new HashSet<BundleInfo> ();
-            ReferenceAssets = new HashSet<AssetInfo> ();
+            ReferenceAssets = new HashSet<IAssetInfo> ();
         }
 
         /// <summary>
         /// 添加引用中的资源
         /// </summary>
         /// <param name="assetInfo"></param>
-        public void AddRefercingAsset (AssetInfo assetInfo)
+        public void AddRefercingAsset (IAssetInfo assetInfo)
         {
             ReferenceAssets.Add (assetInfo);
         }
@@ -55,7 +55,7 @@ namespace UniAsset
         /// 移除引用中的资源
         /// </summary>
         /// <param name="assetInfo"></param>
-        public void SubRefercingAsset (AssetInfo assetInfo)
+        public void SubRefercingAsset (IAssetInfo assetInfo)
         {
             ReferenceAssets.Remove (assetInfo);
             if ( IsCanUnload () )
@@ -63,7 +63,7 @@ namespace UniAsset
                 //穷举该资源包的依赖项，告诉对方我要被释放了，不会再依赖你了
                 foreach ( var item in Dependencys )
                 {
-                    if ( item.Dependents.Contains (this) ) 
+                    if ( item.Dependents.Contains (this) )
                     {
                         item.Dependents.Remove (this);
                     }

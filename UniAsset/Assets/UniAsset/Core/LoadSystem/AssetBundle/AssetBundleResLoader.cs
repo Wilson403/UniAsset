@@ -22,7 +22,7 @@ namespace UniAsset
         /// <summary>
         /// 已加载的Asset字典
         /// </summary>
-        Dictionary<string , AssetInfo> _loadedAssetDic;
+        Dictionary<string , IAssetInfo> _loadedAssetDic;
 
         public AssetBundleResLoader (string manifestFilePath)
         {
@@ -30,7 +30,7 @@ namespace UniAsset
             {
                 UnloadAll ();
                 _loadedBundleDic = new Dictionary<string , BundleInfo> ();
-                _loadedAssetDic = new Dictionary<string , AssetInfo> ();
+                _loadedAssetDic = new Dictionary<string , IAssetInfo> ();
                 RootDir = FileSystem.StandardizeBackslashSeparator (Path.GetDirectoryName (manifestFilePath));
                 AssetBundle ab = AssetBundle.LoadFromFile (manifestFilePath);
                 _manifest = ab.LoadAsset<AssetBundleManifest> ("AssetBundleManifest");
@@ -71,30 +71,30 @@ namespace UniAsset
             return dependList;
         }
 
-        public override AssetInfo GetAssetInfo (string abName , string assetName)
+        public override AssetInfo<T> GetAssetInfo<T> (string abName , string assetName)
         {
             string key = FileSystem.CombinePaths (abName , assetName);
-            if ( !_loadedAssetDic.TryGetValue (key , out AssetInfo assetInfo) )
+            if ( !_loadedAssetDic.TryGetValue (key , out IAssetInfo assetInfo) )
             {
-                assetInfo = new AssetInfo (abName , assetName);
+                assetInfo = new AssetInfo<T> (abName , assetName);
                 _loadedAssetDic [key] = assetInfo;
             }
-            return assetInfo;
+            return assetInfo as AssetInfo<T>;
         }
 
         public override BundleInfo GetBundleInfo (string abName)
         {
-            if ( _loadedBundleDic.ContainsKey (abName) ) 
+            if ( _loadedBundleDic.ContainsKey (abName) )
             {
                 return _loadedBundleDic [abName];
             }
             return default;
         }
 
-        public override AssetInfo Load<T> (string abName , string assetName)
+        public override AssetInfo<T> Load<T> (string abName , string assetName)
         {
             MakeABNameNotEmpty (ref abName);
-            AssetInfo assetInfo = GetAssetInfo (abName , assetName);
+            AssetInfo<T> assetInfo = GetAssetInfo<T> (abName , assetName);
             abName = ABNameWithExtension (abName);
 
             //如果asset不存在，先从Bundle中加载到内存
@@ -111,15 +111,15 @@ namespace UniAsset
             return assetInfo;
         }
 
-        public override void LoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress = null)
+        public override void LoadAsync<T> (string abName , string assetName , Action<AssetInfo<T>> onLoaded , Action<float> onProgress = null)
         {
             UniAssetRuntime.Ins.StartCoroutine (LoadAsyncByCoroutine (abName , assetName , onLoaded , onProgress));
         }
 
-        IEnumerator LoadAsyncByCoroutine (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress)
+        IEnumerator LoadAsyncByCoroutine<T> (string abName , string assetName , Action<AssetInfo<T>> onLoaded , Action<float> onProgress) where T : UnityEngine.Object
         {
             MakeABNameNotEmpty (ref abName);
-            AssetInfo assetInfo = GetAssetInfo (abName , assetName);
+            AssetInfo<T> assetInfo = GetAssetInfo<T> (abName , assetName);
             abName = ABNameWithExtension (abName);
 
             if ( !assetInfo.Asset )
@@ -135,7 +135,7 @@ namespace UniAsset
                     yield return new WaitForEndOfFrame ();
                 }
                 while ( false == abr.isDone );
-                assetInfo.Asset = abr.asset;
+                assetInfo.Asset = abr.asset as T;
             }
             onLoaded.Invoke (assetInfo);
         }
@@ -169,7 +169,7 @@ namespace UniAsset
                 //穷举依赖项，如果可以卸载就一起卸载了
                 foreach ( var depBundleInfo in bundleInfo.Dependencys )
                 {
-                    if ( depBundleInfo.IsCanUnload () ) 
+                    if ( depBundleInfo.IsCanUnload () )
                     {
                         Unload (depBundleInfo.assetBundleName , false);
                     }
@@ -182,7 +182,7 @@ namespace UniAsset
 
         public override void UnloadAll ()
         {
-            if ( _loadedBundleDic == null ) 
+            if ( _loadedBundleDic == null )
             {
                 return;
             }

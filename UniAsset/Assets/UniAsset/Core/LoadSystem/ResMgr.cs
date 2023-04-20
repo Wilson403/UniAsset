@@ -93,7 +93,7 @@ namespace UniAsset
         /// <param name="abName"></param>
         /// <param name="assetName"></param>
         /// <returns></returns>
-        public AssetInfo Load<T> (string abName , string assetName) where T : UnityEngine.Object
+        public AssetInfo<T> Load<T> (string abName , string assetName) where T : UnityEngine.Object
         {
             // 如果任一路径值无效，那么返回空值
             if ( string.IsNullOrEmpty (abName) || string.IsNullOrEmpty (assetName) )
@@ -101,7 +101,7 @@ namespace UniAsset
                 return null;
             };
 
-            AssetInfo result = null;
+            AssetInfo<T> result = null;
             try
             {
                 result = _loader.Load<T> (abName , assetName);
@@ -139,7 +139,7 @@ namespace UniAsset
         /// <typeparam name="T"></typeparam>
         /// <param name="assetPath"></param>
         /// <returns></returns>
-        public AssetInfo Load<T> (string assetPath) where T : UnityEngine.Object
+        public AssetInfo<T> Load<T> (string assetPath) where T : UnityEngine.Object
         {
             string abName;
             string assetName;
@@ -155,35 +155,21 @@ namespace UniAsset
         /// <param name="assetName">资源名称</param>
         /// <param name="onLoaded"></param>
         /// <param name="onProgress"></param>
-        public void LoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress = null)
+        public void LoadAsync<T> (string abName , string assetName , Action<AssetInfo<T>> onLoaded , Action<float> onProgress = null) where T : UnityEngine.Object
         {
-            _loader.LoadAsync (abName , assetName , onLoaded , onProgress);
-        }
-
-        /// <summary>
-        /// 异步加载一个资源
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="assetPath">资源路径</param>        
-        /// <param name="onLoaded"></param>
-        /// <param name="onProgress"></param>
-        public void LoadAsync (string assetPath , Action<AssetInfo> onLoaded , Action<float> onProgress = null)
-        {
-            string abName;
-            string assetName;
-            SeparateAssetPath (assetPath , out abName , out assetName);
             _loader.LoadAsync (abName , assetName , onLoaded , onProgress);
         }
 
         /// <summary>
         /// 获取资源信息
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="abName"></param>
         /// <param name="assetName"></param>
         /// <returns></returns>
-        public AssetInfo GetAssetInfo (string abName , string assetName)
+        public AssetInfo<T> GetAssetInfo<T> (string abName , string assetName) where T : UnityEngine.Object
         {
-            return _loader.GetAssetInfo (abName , assetName);
+            return _loader.GetAssetInfo<T> (abName , assetName);
         }
 
         /// <summary>

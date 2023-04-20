@@ -47,5 +47,14 @@ public class Simple : MonoBehaviour
         var assetInfo = ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01");
         var obj01 = assetInfo.Instantiate (transform);
         Object.Instantiate (obj01 , transform);
+
+        //var assetInfo2 = ResMgr.Ins.Load<Sprite> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01");
+        //Debug.Log (assetInfo2.Asset.texture);
+
+        //异步加载
+        //ResMgr.Ins.LoadAsync<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01" , (assetInfo) =>
+        //{
+        //    assetInfo.Instantiate (transform);
+        //});
     }
 }

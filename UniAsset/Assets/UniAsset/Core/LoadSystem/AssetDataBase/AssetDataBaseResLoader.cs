@@ -79,7 +79,7 @@ namespace UniAsset
             return new BundleInfo (null , abName);
         }
 
-        public override AssetInfo Load<T> (string abName , string assetName)
+        public override AssetInfo<T> Load<T> (string abName , string assetName)
         {
 #if UNITY_EDITOR            
             string path = AssetBundlePath2ResourcePath (abName , assetName);
@@ -88,7 +88,7 @@ namespace UniAsset
             {
                 Debug.LogErrorFormat ("资源不存在：{0}" , path);
             }
-            var assetInfo = new AssetInfo (abName , assetName);
+            var assetInfo = new AssetInfo<T> (abName , assetName);
             assetInfo.Asset = asset;
             return assetInfo;
 #else
@@ -96,12 +96,12 @@ namespace UniAsset
 #endif
         }
 
-        public override void LoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress = null)
+        public override void LoadAsync<T> (string abName , string assetName , Action<AssetInfo<T>> onLoaded , Action<float> onProgress = null)
         {
             UniAssetRuntime.Ins.StartCoroutine (ResourceLoadAsync (abName , assetName , onLoaded , onProgress));
         }
 
-        IEnumerator ResourceLoadAsync (string abName , string assetName , Action<AssetInfo> onLoaded , Action<float> onProgress)
+        IEnumerator ResourceLoadAsync<T> (string abName , string assetName , Action<AssetInfo<T>> onLoaded , Action<float> onProgress) where T : UnityEngine.Object
         {
             var assetPath = AssetBundlePath2ResourcePath (abName , assetName);
             if ( null != onProgress )
@@ -117,8 +117,8 @@ namespace UniAsset
             UnityEngine.Object obj = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object> (assetPath);
             if ( null != onLoaded )
             {
-                var assetInfo = new AssetInfo (abName , assetName);
-                assetInfo.Asset = obj;
+                var assetInfo = new AssetInfo<T> (abName , assetName);
+                assetInfo.Asset = obj as T;
                 onLoaded.Invoke (assetInfo);
             }
 #else

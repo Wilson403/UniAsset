@@ -65,12 +65,22 @@ ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01
 ```
 
 ```c#
-var assetInfo2= ResMgr.Ins.Load<Sprite> (AssetBundleName.IMAGE_SKILL , "skill");
+var assetInfo2 = ResMgr.Ins.Load<Sprite> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01");
+Debug.Log (assetInfo2.Asset.texture);
 assetInfo2.AddRefCount (); //增加引用
 assetInfo2.SubRefCount (); //减少引用
 ```
 
+```c#
+//异步加载
+ResMgr.Ins.LoadAsync<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01" , (assetInfo) =>
+{
+    assetInfo.Instantiate (transform);
+});
+```
+
 * 需要注意的是，**GameObject类型的资源，你无需关心释放，框架会自动管理，只是第一次实例化需要调用框架本身Instantiate ()，之后拷贝可以随意**
+
 * 对于像图片这种引用类型资源，需要手动Add和Sub引用，在那里使用就在那里释放。**当然你可以做多一层的封装来简化代码，拿UI框架举例子，所有界面都继承一个类，这个类分别在创建时Add，销毁时Sub，这样就不用每次都重复相同的细节**
 
 

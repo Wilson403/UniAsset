@@ -2,13 +2,18 @@
 
 namespace UniAsset
 {
-    public class AssetInfo
+    public interface IAssetInfo
+    {
+
+    }
+
+    public class AssetInfo<T> : IAssetInfo where T : UnityEngine.Object
     {
         public readonly string abName;
         public readonly string assetName;
         private const int minLifeTime = 3;
         private readonly float _createTime;
-        private UnityEngine.Object _asset;
+        private T _asset;
 
         /// <summary>
         /// 引用次数
@@ -18,7 +23,7 @@ namespace UniAsset
         /// <summary>
         /// 对应的UnityEngine.Object类型资源
         /// </summary>
-        public UnityEngine.Object Asset
+        public T Asset
         {
             get
             {

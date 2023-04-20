@@ -14,7 +14,7 @@ namespace UniAsset
         {
             if ( !string.IsNullOrEmpty (abName) && !string.IsNullOrEmpty (assetName) )
             {
-                var assetInfo = ResMgr.Ins.GetAssetInfo (abName , assetName);
+                var assetInfo = ResMgr.Ins.GetAssetInfo<GameObject> (abName , assetName);
                 if ( assetInfo != null )
                 {
                     assetInfo.AddRefCount ();
@@ -29,7 +29,7 @@ namespace UniAsset
 
         private void OnDestroy ()
         {
-            var assetInfo = ResMgr.Ins.GetAssetInfo (abName , assetName);
+            var assetInfo = ResMgr.Ins.GetAssetInfo<GameObject> (abName , assetName);
             if ( assetInfo != null )
             {
                 assetInfo.SubRefCount ();
