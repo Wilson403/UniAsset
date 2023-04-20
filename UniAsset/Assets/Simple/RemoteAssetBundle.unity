@@ -250,7 +250,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   resLoadMode: 2
-  netPath: http://192.168.31.197/res_test/
+  netPath: http://192.168.31.197:8080/res/
 --- !u!1 &108216050
 GameObject:
   m_ObjectHideFlags: 0
