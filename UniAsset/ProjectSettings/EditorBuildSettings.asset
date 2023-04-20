@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Simple/Simple_1_Editor_Load_Asset/LocalAssetBundle.unity
+    path: Assets/Simple/LocalAssetBundle.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   m_configObjects: {}

@@ -69,12 +69,13 @@ namespace UniAsset
         /// <summary>
         /// 实例化
         /// </summary>
+        /// <param name="parent"></param>
         /// <returns></returns>
-        public GameObject Instantiate ()
+        public GameObject Instantiate (Transform parent = null)
         {
             if ( IsGameObjectType () )
             {
-                var newObj = UnityEngine.Object.Instantiate (Asset) as GameObject;
+                var newObj = UnityEngine.Object.Instantiate (Asset , parent) as GameObject;
                 var component = newObj.AddComponent<GameObjectLifeListener> ();
                 component.assetName = assetName;
                 component.abName = abName;

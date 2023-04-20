@@ -74,6 +74,11 @@ namespace UniAsset
             return new string [0];
         }
 
+        public override BundleInfo GetBundleInfo (string abName)
+        {
+            return new BundleInfo (null , abName);
+        }
+
         public override AssetInfo Load<T> (string abName , string assetName)
         {
 #if UNITY_EDITOR            
