@@ -2,10 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// 本地加载AssetBundle的案例
-/// </summary>
-public class LocalAssetBundle : MonoBehaviour
+public class Simple : MonoBehaviour
 {
     public Button btnOk;
     bool _isOk;
@@ -50,11 +47,5 @@ public class LocalAssetBundle : MonoBehaviour
         var assetInfo = ResMgr.Ins.Load<GameObject> (AssetBundleName.PREFAB_OTHER_PREFAB_01 , "prefab_01");
         var obj01 = assetInfo.Instantiate (transform);
         Object.Instantiate (obj01 , transform);
-
-        var info = ResMgr.Ins.GetBundleInfo (assetInfo.abName);
-        foreach ( var item in info.Dependencys )
-        {
-            Debug.LogWarning ($"{item.assetBundleName}");
-        }
     }
 }
